@@ -1,0 +1,248 @@
+version: 2
+directus: 12.2.0
+vendor: postgres
+
+collections:
+  - collection: demandes_business_plan
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: demandes_business_plan
+      color: null
+      display_template: null
+      group: null
+      hidden: false
+      icon: description
+      item_duplication_fields: null
+      note: "Demandes de Business Plans effectuées par les investisseurs."
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: demandes_business_plan
+
+fields:
+  - collection: demandes_business_plan
+    field: id
+    type: integer
+    meta:
+      collection: demandes_business_plan
+      field: id
+      hidden: true
+      interface: input
+      readonly: true
+      required: false
+      sort: 1
+      width: full
+    schema:
+      name: id
+      table: demandes_business_plan
+      data_type: integer
+      default_value: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: demandes_business_plan
+    field: projet
+    type: integer
+    meta:
+      collection: demandes_business_plan
+      field: projet
+      display: related-values
+      display_options:
+        template: "{{titre}}"
+      interface: select-dropdown-m2o
+      note: "Projet pour lequel le Business Plan est demandé."
+      options:
+        template: "{{titre}}"
+      hidden: false
+      readonly: false
+      required: true
+      sort: 2
+      special:
+        - m2o
+      width: half
+    schema:
+      name: projet
+      table: demandes_business_plan
+      data_type: integer
+      default_value: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: PROJETS
+      foreign_key_column: id
+
+  - collection: demandes_business_plan
+    field: investisseur
+    type: integer
+    meta:
+      collection: demandes_business_plan
+      field: investisseur
+      display: related-values
+      display_options:
+        template: "{{prenom}} {{nom}}"
+      interface: select-dropdown-m2o
+      note: "Investisseur ayant effectué la demande."
+      options:
+        template: "{{prenom}} {{nom}}"
+      hidden: false
+      readonly: false
+      required: true
+      sort: 3
+      special:
+        - m2o
+      width: half
+    schema:
+      name: investisseur
+      table: demandes_business_plan
+      data_type: integer
+      default_value: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: investisseurs
+      foreign_key_column: id
+
+  - collection: demandes_business_plan
+    field: statut
+    type: string
+    meta:
+      collection: demandes_business_plan
+      field: statut
+      display: labels
+      display_options:
+        choices:
+          - {text: "Demandée", value: demandee}
+          - {text: "Validée", value: validee}
+          - {text: "Refusée", value: refusee}
+          - {text: "Téléchargée", value: telechargee}
+      interface: select-dropdown
+      note: "État de traitement de la demande."
+      options:
+        choices:
+          - {text: "Demandée", value: demandee}
+          - {text: "Validée", value: validee}
+          - {text: "Refusée", value: refusee}
+          - {text: "Téléchargée", value: telechargee}
+      hidden: false
+      readonly: false
+      required: true
+      sort: 4
+      width: half
+    schema:
+      name: statut
+      table: demandes_business_plan
+      data_type: character varying
+      default_value: demandee
+      max_length: 255
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: demandes_business_plan
+    field: date_created
+    type: timestamp
+    meta:
+      collection: demandes_business_plan
+      field: date_created
+      display: datetime
+      display_options:
+        relative: true
+      hidden: true
+      interface: datetime
+      readonly: true
+      required: false
+      sort: 5
+      special:
+        - date-created
+      width: half
+    schema:
+      name: date_created
+      table: demandes_business_plan
+      data_type: timestamp with time zone
+      default_value: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+systemFields: []
+
+relations:
+  - collection: demandes_business_plan
+    field: projet
+    related_collection: PROJETS
+    meta:
+      junction_field: null
+      many_collection: demandes_business_plan
+      many_field: projet
+      one_allowed_collections: null
+      one_collection: PROJETS
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: demandes_business_plan
+      column: projet
+      foreign_key_table: PROJETS
+      foreign_key_column: id
+      constraint_name: demandes_business_plan_projet_foreign
+      on_update: NO ACTION
+      on_delete: RESTRICT
+
+  - collection: demandes_business_plan
+    field: investisseur
+    related_collection: investisseurs
+    meta:
+      junction_field: null
+      many_collection: demandes_business_plan
+      many_field: investisseur
+      one_allowed_collections: null
+      one_collection: investisseurs
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: demandes_business_plan
+      column: investisseur
+      foreign_key_table: investisseurs
+      foreign_key_column: id
+      constraint_name: demandes_business_plan_investisseur_foreign
+      on_update: NO ACTION
+      on_delete: RESTRICT

@@ -1,0 +1,392 @@
+version: 2
+directus: 12.2.0
+vendor: postgres
+
+collections:
+  - collection: investisseurs
+    meta:
+      accountability: all
+      archive_app_filter: true
+      archive_field: null
+      archive_value: null
+      collapse: open
+      collection: investisseurs
+      color: null
+      display_template: "{{prenom}} {{nom}}"
+      group: null
+      hidden: false
+      icon: groups
+      item_duplication_fields: null
+      note: "Investisseurs ayant rempli le formulaire de contact pour accéder aux Business Plans."
+      singleton: false
+      sort: null
+      sort_field: null
+      translations: null
+      unarchive_value: null
+      versioning: false
+    schema:
+      name: investisseurs
+
+fields:
+  - collection: investisseurs
+    field: id
+    type: integer
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: id
+      group: null
+      hidden: true
+      interface: input
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 1
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: id
+      table: investisseurs
+      data_type: integer
+      default_value: null
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: false
+      is_unique: true
+      is_primary_key: true
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: true
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: prenom
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: prenom
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: true
+      sort: 2
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: prenom
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: nom
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: nom
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: true
+      sort: 3
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: nom
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: email
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: email
+      group: null
+      hidden: false
+      interface: input
+      note: "Adresse e-mail renseignée dans le formulaire investisseur."
+      options:
+        trim: true
+      readonly: false
+      required: true
+      sort: 4
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: telephone
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: telephone
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      sort: 5
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: telephone
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: entreprise
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: entreprise
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: entreprise
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: fonction
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: fonction
+      group: null
+      hidden: false
+      interface: input
+      note: null
+      options:
+        trim: true
+      readonly: false
+      required: false
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: fonction
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: pays
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: pays
+      group: null
+      hidden: false
+      interface: input
+      note: "Pays de résidence ou d'implantation de l'investisseur."
+      options:
+        trim: true
+      readonly: false
+      required: true
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: pays
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: false
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+  - collection: investisseurs
+    field: date_created
+    type: timestamp
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_created
+      group: null
+      hidden: true
+      interface: datetime
+      note: null
+      options: null
+      readonly: true
+      required: false
+      sort: 9
+      special:
+        - date-created
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_created
+      table: investisseurs
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+
+systemFields: []
+relations: []

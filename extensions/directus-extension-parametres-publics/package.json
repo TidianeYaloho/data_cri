@@ -1,0 +1,16 @@
+{
+  "name": "directus-extension-parametres-publics",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "endpoint"
+  ],
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "dist/index.js",
+    "source": "src/index.js",
+    "host": "^12.0.0"
+  }
+}

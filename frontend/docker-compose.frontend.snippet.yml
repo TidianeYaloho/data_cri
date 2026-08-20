@@ -1,0 +1,18 @@
+# NE PAS remplacer votre compose.yml actuel par ce fichier.
+# Il s'agit uniquement du bloc à intégrer plus tard sous `services:`.
+# Nous l'adapterons ensemble au compose.yml déjà fonctionnel.
+
+frontend:
+  build:
+    context: ./frontend
+  ports:
+    - "5173:5173"
+  volumes:
+    - ./frontend:/app
+    - /app/node_modules
+  environment:
+    - VITE_DIRECTUS_URL=http://localhost:8055
+    - VITE_USE_MOCK_DATA=true
+    - VITE_ENABLE_REQUESTS=false
+  depends_on:
+    - directus
