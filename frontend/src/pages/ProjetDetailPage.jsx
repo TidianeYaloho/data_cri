@@ -1,14 +1,10 @@
-import { useState } from 'react';
-import { directusAssetUrl } from '../api/directus.js';
+import { useEffect, useMemo, useState } from 'react';
+import { projectImageUrl } from '../api/directus.js';
 import RequestModal from '../components/RequestModal.jsx';
 import SectorIcon from '../components/SectorIcon.jsx';
 
 function formatMoney(value) {
-  if (
-    value === null ||
-    value === undefined ||
-    value === ''
-  ) {
+  if (value === null || value === undefined || value === '') {
     return 'À préciser';
   }
 
@@ -26,107 +22,140 @@ function formatMoney(value) {
 function label(value) {
   if (!value) return 'Non renseigné';
 
-  return (
-    value.charAt(0).toUpperCase() +
-    value.slice(1).replaceAll('_', ' ')
-  );
+  return value.charAt(0).toUpperCase() + value.slice(1).replaceAll('_', ' ');
 }
 
-function getAccessConfiguration(mode) {
-  /*
-   * MODE 1 :
-   * accès au Business Plan désactivé
-   */
-  if (
-    mode === 'desactive' ||
-    mode === 'disabled' ||
-    mode === 'off'
-  ) {
+function getAccessConfiguration(mode, accountsEnabled, investorAccount) {
+  if (mode === 'desactive') {
     return {
       disabled: true,
       buttonLabel: 'Business Plan indisponible',
-      message:
-        "L'accès au Business Plan en ligne est actuellement désactivé.",
+      message: "L'accès au Business Plan en ligne est actuellement désactivé.",
     };
   }
 
-  /*
-   * MODE 2 :
-   * accès immédiat après identification
-   */
-  if (
-    mode === 'immediat' ||
-    mode === 'immediate' ||
-    mode === 'acces_immediat' ||
-    mode === 'identification'
-  ) {
+  if (accountsEnabled && !investorAccount?.profil) {
+    return {
+      disabled: false,
+      buttonLabel: 'Se connecter pour continuer',
+      message:
+        'Connectez-vous ou créez votre espace investisseur pour demander et suivre ce Business Plan.',
+    };
+  }
+
+  if (mode === 'direct') {
     return {
       disabled: false,
       buttonLabel: 'Accéder au Business Plan',
-      message:
-        'Identifiez-vous pour accéder au Business Plan.',
+      message: accountsEnabled
+        ? 'Votre compte investisseur permet un accès immédiat et sécurisé au Business Plan.'
+        : 'Identifiez-vous pour obtenir immédiatement un accès sécurisé au Business Plan.',
     };
   }
 
-  /*
-   * MODE 3 :
-   * validation par un agent.
-   *
-   * C'est aussi le comportement de sécurité
-   * par défaut si une valeur inconnue est reçue.
-   */
   return {
     disabled: false,
     buttonLabel: 'Demander le Business Plan',
-    message:
-      'Soumettez une demande pour accéder au Business Plan après validation par le CRI.',
+    message: accountsEnabled
+      ? 'Votre demande sera rattachée à votre espace investisseur et suivie après validation ou refus du CRI.'
+      : 'Soumettez une demande. Le CRI vous informera par e-mail après validation ou refus.',
   };
 }
 
 export default function ProjetDetailPage({
   project,
   platformSettings,
+  refreshPlatformSettings,
+  investorAccount,
+  onRequireAccount,
+  onAccountExpired,
   onBack,
 }) {
   const [requestOpen, setRequestOpen] = useState(false);
+  const [liveSettings, setLiveSettings] = useState(platformSettings);
+  const [checkingSettings, setCheckingSettings] = useState(false);
+  const [accessNotice, setAccessNotice] = useState('');
 
-  const imageUrl = directusAssetUrl(
-    project.image_principale,
-    {
-      width: 1400,
-      height: 760,
-      fit: 'cover',
-      quality: 86,
-    },
+  useEffect(() => {
+    setLiveSettings(platformSettings);
+  }, [platformSettings]);
+
+  useEffect(() => {
+    if (
+      requestOpen &&
+      liveSettings?.mode_acces_business_plan === 'desactive'
+    ) {
+      setRequestOpen(false);
+      setAccessNotice(
+        "L'accès au Business Plan vient d'être désactivé par le CRI.",
+      );
+    }
+  }, [liveSettings, requestOpen]);
+
+  const imageUrl = project.has_image ? projectImageUrl(project.id) : '';
+
+  const modeAcces = liveSettings?.mode_acces_business_plan ?? null;
+  const comptesInvestisseurs = liveSettings?.comptes_investisseurs ?? false;
+
+  const accessConfiguration = useMemo(
+    () =>
+      getAccessConfiguration(
+        modeAcces,
+        comptesInvestisseurs,
+        investorAccount,
+      ),
+    [modeAcces, comptesInvestisseurs, investorAccount],
   );
 
-  const modeAcces =
-    platformSettings?.mode_acces_business_plan ?? null;
+  const settingsReady = liveSettings !== null;
 
-  const comptesInvestisseurs =
-    platformSettings?.comptes_investisseurs ?? false;
+  async function handleBusinessPlanClick() {
+    if (checkingSettings) return;
 
-  const accessConfiguration =
-    getAccessConfiguration(modeAcces);
+    setCheckingSettings(true);
+    setAccessNotice('');
 
-  const settingsReady = platformSettings !== null;
+    try {
+      const freshSettings = await refreshPlatformSettings();
+      setLiveSettings(freshSettings);
 
-  function handleBusinessPlanClick() {
-    if (!settingsReady) return;
-    if (accessConfiguration.disabled) return;
+      const freshConfiguration = getAccessConfiguration(
+        freshSettings.mode_acces_business_plan,
+        freshSettings.comptes_investisseurs,
+        investorAccount,
+      );
 
-    setRequestOpen(true);
+      if (freshConfiguration.disabled) {
+        setAccessNotice(
+          "L'accès au Business Plan vient d'être désactivé par le CRI.",
+        );
+        return;
+      }
+
+      if (
+        freshSettings.comptes_investisseurs &&
+        !investorAccount?.profil
+      ) {
+        onRequireAccount();
+        return;
+      }
+
+      setRequestOpen(true);
+    } catch (error) {
+      console.error(error);
+      setAccessNotice(
+        "Impossible de vérifier les modalités d'accès pour le moment. Réessayez dans quelques instants.",
+      );
+    } finally {
+      setCheckingSettings(false);
+    }
   }
 
   return (
     <>
       <section className="detail-hero">
         <div className="container">
-          <button
-            className="back-link"
-            type="button"
-            onClick={onBack}
-          >
+          <button className="back-link" type="button" onClick={onBack}>
             ← Retour aux projets
           </button>
 
@@ -134,11 +163,7 @@ export default function ProjetDetailPage({
             <div className="detail-copy">
               <div className="detail-tags">
                 <span>{label(project.secteur)}</span>
-
-                <span>
-                  {project.province ||
-                    'Guelmim-Oued Noun'}
-                </span>
+                <span>{project.province || 'Guelmim-Oued Noun'}</span>
               </div>
 
               <p className="project-detail-code">
@@ -147,28 +172,16 @@ export default function ProjetDetailPage({
 
               <h1>{project.titre}</h1>
 
-              <p>
-                {project.description ||
-                  'Description à compléter.'}
-              </p>
+              <p>{project.description || 'Description à compléter.'}</p>
             </div>
 
-            <div
-              className={`detail-visual sector-${project.secteur || 'service'
-                }`}
-            >
+            <div className={`detail-visual sector-${project.secteur || 'service'}`}>
               {imageUrl ? (
                 <img src={imageUrl} alt="" />
               ) : (
                 <div className="detail-placeholder">
-                  <SectorIcon
-                    sector={project.secteur}
-                    size={82}
-                  />
-
-                  <span>
-                    {label(project.secteur)}
-                  </span>
+                  <SectorIcon sector={project.secteur} size={82} />
+                  <span>{label(project.secteur)}</span>
                 </div>
               )}
             </div>
@@ -183,76 +196,43 @@ export default function ProjetDetailPage({
 
             <p>
               {project.description ||
-                'Les informations détaillées du projet seront complétées dans Directus.'}
+                'Les informations détaillées du projet seront complétées par le CRI.'}
             </p>
 
             <div className="detail-info-grid">
               <div>
                 <span>Secteur</span>
-                <strong>
-                  {label(project.secteur)}
-                </strong>
+                <strong>{label(project.secteur)}</strong>
               </div>
 
               <div>
                 <span>Filière</span>
-                <strong>
-                  {label(project.filiere)}
-                </strong>
+                <strong>{label(project.filiere)}</strong>
               </div>
 
               <div>
                 <span>Province</span>
-                <strong>
-                  {project.province ||
-                    'À préciser'}
-                </strong>
+                <strong>{project.province || 'À préciser'}</strong>
               </div>
 
               <div>
                 <span>Code projet</span>
-                <strong>
-                  {project.code_projet ||
-                    'À préciser'}
-                </strong>
+                <strong>{project.code_projet || 'À préciser'}</strong>
               </div>
-            </div>
-
-            <div className="prototype-note">
-              <strong>Prototype évolutif</strong>
-
-              <p>
-                Cette zone pourra recevoir les futurs
-                champs demandés par le CRI : maturité,
-                foncier, capacité, calendrier, besoins
-                en ressources, partenaires, indicateurs
-                financiers, etc.
-              </p>
             </div>
           </div>
 
           <aside className="investment-card">
-            <p className="eyebrow eyebrow-dark">
-              Indicateurs clés
-            </p>
+            <p className="eyebrow eyebrow-dark">Indicateurs clés</p>
 
             <div className="investment-stat">
               <span>Investissement estimé</span>
-
-              <strong>
-                {formatMoney(
-                  project.investissement_mad,
-                )}
-              </strong>
+              <strong>{formatMoney(project.investissement_mad)}</strong>
             </div>
 
             <div className="investment-stat">
               <span>Nombre de postes</span>
-
-              <strong>
-                {project.nombre_postes ??
-                  'À préciser'}
-              </strong>
+              <strong>{project.nombre_postes ?? 'À préciser'}</strong>
             </div>
 
             <hr />
@@ -260,14 +240,15 @@ export default function ProjetDetailPage({
             <h3>Intéressé par ce projet ?</h3>
 
             {!settingsReady ? (
-              <p>
-                Chargement des modalités d'accès au
-                Business Plan...
-              </p>
+              <p>Chargement des modalités d'accès au Business Plan...</p>
             ) : (
-              <p>
-                {accessConfiguration.message}
-              </p>
+              <p>{accessConfiguration.message}</p>
+            )}
+
+            {accessNotice && (
+              <div className="form-message form-message-error access-notice">
+                {accessNotice}
+              </div>
             )}
 
             <button
@@ -275,13 +256,16 @@ export default function ProjetDetailPage({
               type="button"
               disabled={
                 !settingsReady ||
+                checkingSettings ||
                 accessConfiguration.disabled
               }
               onClick={handleBusinessPlanClick}
             >
-              {settingsReady
-                ? accessConfiguration.buttonLabel
-                : 'Chargement...'}
+              {checkingSettings
+                ? 'Vérification...'
+                : settingsReady
+                  ? accessConfiguration.buttonLabel
+                  : 'Chargement...'}
             </button>
           </aside>
         </div>
@@ -291,12 +275,14 @@ export default function ProjetDetailPage({
         <RequestModal
           project={project}
           modeAcces={modeAcces}
-          comptesInvestisseurs={
-            comptesInvestisseurs
-          }
-          onClose={() =>
-            setRequestOpen(false)
-          }
+          comptesInvestisseurs={comptesInvestisseurs}
+          investorAccount={investorAccount}
+          onAccountExpired={() => {
+            onAccountExpired();
+            setRequestOpen(false);
+            onRequireAccount();
+          }}
+          onClose={() => setRequestOpen(false)}
         />
       )}
     </>

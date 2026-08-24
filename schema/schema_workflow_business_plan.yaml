@@ -1,0 +1,2255 @@
+version: 1
+directus: 12.2.0
+vendor: postgres
+collections:
+- collection: PROJETS
+  meta:
+    accountability: all
+    archive_app_filter: true
+    archive_field: archived
+    archive_value: 'true'
+    autosave_revision_interval: null
+    collapse: open
+    collection: PROJETS
+    color: null
+    display_template: null
+    group: null
+    hidden: false
+    icon: null
+    item_duplication_fields: null
+    note: null
+    preview_url: null
+    singleton: false
+    sort: null
+    sort_field: null
+    status: active
+    translations: null
+    unarchive_value: 'false'
+    versioning: false
+  schema:
+    name: PROJETS
+- collection: demandes_business_plan
+  meta:
+    accountability: all
+    archive_app_filter: true
+    archive_field: null
+    archive_value: null
+    autosave_revision_interval: null
+    collapse: open
+    collection: demandes_business_plan
+    color: null
+    display_template: null
+    group: null
+    hidden: false
+    icon: description
+    item_duplication_fields: null
+    note: 'Demandes de Business Plans : traitement agent, lien sécurisé et suivi des notifications/téléchargements.'
+    preview_url: null
+    singleton: false
+    sort: null
+    sort_field: null
+    status: active
+    translations: null
+    unarchive_value: null
+    versioning: false
+  schema:
+    name: demandes_business_plan
+- collection: investisseurs
+  meta:
+    accountability: all
+    archive_app_filter: true
+    archive_field: null
+    archive_value: null
+    autosave_revision_interval: null
+    collapse: open
+    collection: investisseurs
+    color: null
+    display_template: '{{prenom}} {{nom}}'
+    group: null
+    hidden: false
+    icon: groups
+    item_duplication_fields: null
+    note: Investisseurs ayant rempli le formulaire de contact pour accéder aux Business Plans.
+    preview_url: null
+    singleton: false
+    sort: null
+    sort_field: null
+    status: active
+    translations: null
+    unarchive_value: null
+    versioning: false
+  schema:
+    name: investisseurs
+- collection: parametres_plateforme
+  meta:
+    accountability: all
+    archive_app_filter: true
+    archive_field: null
+    archive_value: null
+    autosave_revision_interval: null
+    collapse: open
+    collection: parametres_plateforme
+    color: null
+    display_template: null
+    group: null
+    hidden: false
+    icon: null
+    item_duplication_fields: null
+    note: null
+    preview_url: null
+    singleton: true
+    sort: null
+    sort_field: null
+    status: active
+    translations: null
+    unarchive_value: null
+    versioning: false
+  schema:
+    name: parametres_plateforme
+fields:
+- collection: PROJETS
+  field: id
+  type: integer
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: id
+    group: null
+    hidden: true
+    interface: input
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 1
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: id
+    table: PROJETS
+    data_type: integer
+    default_value: nextval('"PROJETS_id_seq"'::regclass)
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: true
+    is_indexed: false
+    is_primary_key: true
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: true
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: archived
+  type: boolean
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: boolean
+    display_options:
+      colorOff: transparent
+      colorOn: var(--theme--foreground-subdued)
+      iconOff: unarchive
+      iconOn: archive
+      labelOff: $t:not_archived
+      labelOn: $t:archived
+    field: archived
+    group: null
+    hidden: false
+    interface: boolean
+    note: null
+    options: null
+    readonly: false
+    required: false
+    searchable: true
+    sort: 2
+    special:
+    - cast-boolean
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: archived
+    table: PROJETS
+    data_type: boolean
+    default_value: false
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: user_created
+  type: uuid
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: user
+    display_options: null
+    field: user_created
+    group: null
+    hidden: true
+    interface: select-dropdown-m2o
+    note: null
+    options:
+      template: '{{avatar}} {{first_name}} {{last_name}}'
+    readonly: true
+    required: false
+    searchable: true
+    sort: 3
+    special:
+    - user-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: user_created
+    table: PROJETS
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_users
+    foreign_key_column: id
+- collection: PROJETS
+  field: date_created
+  type: timestamp
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_created
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 4
+    special:
+    - date-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_created
+    table: PROJETS
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: user_updated
+  type: uuid
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: user
+    display_options: null
+    field: user_updated
+    group: null
+    hidden: true
+    interface: select-dropdown-m2o
+    note: null
+    options:
+      template: '{{avatar}} {{first_name}} {{last_name}}'
+    readonly: true
+    required: false
+    searchable: true
+    sort: 5
+    special:
+    - user-updated
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: user_updated
+    table: PROJETS
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_users
+    foreign_key_column: id
+- collection: PROJETS
+  field: date_updated
+  type: timestamp
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_updated
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 6
+    special:
+    - date-updated
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_updated
+    table: PROJETS
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: titre
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: titre
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      placeholder: entrez le tire du projet ici (opportunité)
+    readonly: false
+    required: true
+    searchable: true
+    sort: 7
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: titre
+    table: PROJETS
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: code_projet
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: code_projet
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      placeholder: ex. E.4
+    readonly: false
+    required: true
+    searchable: true
+    sort: 8
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: code_projet
+    table: PROJETS
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: secteur
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: secteur
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: null
+    options:
+      choices:
+      - text: 'Agriculture '
+        value: 'agriculture '
+      - text: 'Énergie '
+        value: 'énergie '
+      - text: Industrie
+        value: industrie
+      - text: 'Environnement '
+        value: environnement
+      - text: Tourisme
+        value: 'tourisme '
+      - text: Service
+        value: service
+      placeholder: 'selectionner le secteur '
+    readonly: false
+    required: true
+    searchable: true
+    sort: 9
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: secteur
+    table: PROJETS
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: filiere
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: filiere
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      placeholder: 'entrez la filière '
+    readonly: false
+    required: true
+    searchable: true
+    sort: 10
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: filiere
+    table: PROJETS
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: description
+  type: text
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: description
+    group: null
+    hidden: false
+    interface: input-multiline
+    note: null
+    options:
+      placeholder: decrivez le projet en quelques mots
+      softLength: 500
+      trim: true
+    readonly: false
+    required: true
+    searchable: true
+    sort: 11
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: description
+    table: PROJETS
+    data_type: text
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: province
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: province
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: null
+    options:
+      choices:
+      - text: Tan-Tan
+        value: tan-tan
+      - text: Sidi-ifni
+        value: sidi-ifni
+      - text: Guelmim
+        value: guelmim
+      - text: Assa_Zag
+        value: assa_zag
+      placeholder: 'selectionnez la province '
+    readonly: false
+    required: true
+    searchable: true
+    sort: 12
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: province
+    table: PROJETS
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: investissement_mad
+  type: decimal
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: investissement_mad
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options: null
+    readonly: false
+    required: true
+    searchable: true
+    sort: 13
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: investissement_mad
+    table: PROJETS
+    data_type: numeric
+    default_value: null
+    max_length: null
+    numeric_precision: 18
+    numeric_scale: 2
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: nombre_postes
+  type: integer
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: nombre_postes
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options: null
+    readonly: false
+    required: true
+    searchable: true
+    sort: 14
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: nombre_postes
+    table: PROJETS
+    data_type: integer
+    default_value: null
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: status_publication
+  type: string
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: status_publication
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: null
+    options:
+      choices:
+      - text: Brouillon
+        value: brouillon
+      - text: En validation
+        value: en_validation
+      - text: Publié
+        value: publie
+      - text: Archivé
+        value: archive
+    readonly: false
+    required: true
+    searchable: true
+    sort: 15
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: status_publication
+    table: PROJETS
+    data_type: character varying
+    default_value: 'Brouillon '
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: PROJETS
+  field: image_principale
+  type: uuid
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: image_principale
+    group: null
+    hidden: false
+    interface: file-image
+    note: null
+    options:
+      allowedMimeTypes:
+      - image/jpeg
+      - image/png
+      - image/webp
+    readonly: false
+    required: false
+    searchable: true
+    sort: 16
+    special:
+    - file
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: image_principale
+    table: PROJETS
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_files
+    foreign_key_column: id
+- collection: PROJETS
+  field: business_plan
+  type: uuid
+  meta:
+    collection: PROJETS
+    conditions: null
+    display: null
+    display_options: null
+    field: business_plan
+    group: null
+    hidden: false
+    interface: file
+    note: null
+    options:
+      allowedMimeTypes:
+      - application/*
+    readonly: false
+    required: false
+    searchable: true
+    sort: 17
+    special:
+    - file
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: business_plan
+    table: PROJETS
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_files
+    foreign_key_column: id
+- collection: demandes_business_plan
+  field: id
+  type: integer
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: null
+    display_options: null
+    field: id
+    group: null
+    hidden: true
+    interface: input
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 1
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: id
+    table: demandes_business_plan
+    data_type: integer
+    default_value: nextval('demandes_business_plan_id_seq'::regclass)
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: true
+    is_indexed: false
+    is_primary_key: true
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: true
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: projet
+  type: integer
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: related-values
+    display_options:
+      template: '{{titre}}'
+    field: projet
+    group: null
+    hidden: false
+    interface: select-dropdown-m2o
+    note: Projet pour lequel le Business Plan est demandé.
+    options:
+      template: '{{titre}}'
+    readonly: false
+    required: true
+    searchable: true
+    sort: 2
+    special:
+    - m2o
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: projet
+    table: demandes_business_plan
+    data_type: integer
+    default_value: null
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: PROJETS
+    foreign_key_column: id
+- collection: demandes_business_plan
+  field: investisseur
+  type: integer
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: related-values
+    display_options:
+      template: '{{prenom}} {{nom}}'
+    field: investisseur
+    group: null
+    hidden: false
+    interface: select-dropdown-m2o
+    note: Investisseur ayant effectué la demande.
+    options:
+      template: '{{prenom}} {{nom}}'
+    readonly: false
+    required: true
+    searchable: true
+    sort: 3
+    special:
+    - m2o
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: investisseur
+    table: demandes_business_plan
+    data_type: integer
+    default_value: null
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: investisseurs
+    foreign_key_column: id
+- collection: demandes_business_plan
+  field: statut
+  type: string
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: labels
+    display_options:
+      choices:
+      - text: Demandée
+        value: demandee
+      - text: Validée
+        value: validee
+      - text: Refusée
+        value: refusee
+      - text: Téléchargée
+        value: telechargee
+    field: statut
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: État de traitement de la demande.
+    options:
+      choices:
+      - text: Demandée
+        value: demandee
+      - text: Validée
+        value: validee
+      - text: Refusée
+        value: refusee
+      - text: Téléchargée
+        value: telechargee
+    readonly: false
+    required: true
+    searchable: true
+    sort: 4
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: statut
+    table: demandes_business_plan
+    data_type: character varying
+    default_value: demandee
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: date_created
+  type: timestamp
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_created
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 5
+    special:
+    - date-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_created
+    table: demandes_business_plan
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: access_token_hash
+  type: string
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: null
+    display_options: null
+    field: access_token_hash
+    group: null
+    hidden: true
+    interface: input
+    note: Empreinte SHA-256 du token d'accès. Le token brut n'est jamais stocké.
+    options: null
+    readonly: true
+    required: false
+    searchable: false
+    sort: 6
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: access_token_hash
+    table: demandes_business_plan
+    data_type: character varying
+    default_value: null
+    max_length: 64
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: true
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: access_expires_at
+  type: timestamp
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: access_expires_at
+    group: null
+    hidden: false
+    interface: datetime
+    note: Date d'expiration du lien sécurisé.
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 7
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: access_expires_at
+    table: demandes_business_plan
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: date_decision
+  type: timestamp
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_decision
+    group: null
+    hidden: false
+    interface: datetime
+    note: Date à laquelle la demande a été validée ou refusée.
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 8
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_decision
+    table: demandes_business_plan
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: date_telechargement
+  type: timestamp
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_telechargement
+    group: null
+    hidden: false
+    interface: datetime
+    note: Date du premier téléchargement réussi du Business Plan.
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 9
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_telechargement
+    table: demandes_business_plan
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: notification_email_statut
+  type: string
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: labels
+    display_options:
+      choices: &id001
+      - text: Non requis
+        value: non_requis
+      - text: Non envoyé
+        value: non_envoye
+      - text: Envoyé
+        value: envoye
+      - text: Erreur
+        value: erreur
+    field: notification_email_statut
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: État du dernier e-mail de décision envoyé à l'investisseur.
+    options:
+      choices: *id001
+    readonly: true
+    required: false
+    searchable: true
+    sort: 10
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: notification_email_statut
+    table: demandes_business_plan
+    data_type: character varying
+    default_value: non_envoye
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: notification_email_date
+  type: timestamp
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: notification_email_date
+    group: null
+    hidden: false
+    interface: datetime
+    note: Date d'envoi du dernier e-mail de décision.
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 11
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: notification_email_date
+    table: demandes_business_plan
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: demandes_business_plan
+  field: notification_email_erreur
+  type: text
+  meta:
+    collection: demandes_business_plan
+    conditions: null
+    display: null
+    display_options: null
+    field: notification_email_erreur
+    group: null
+    hidden: false
+    interface: input-multiline
+    note: Message technique en cas d'échec d'envoi d'e-mail.
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 12
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: notification_email_erreur
+    table: demandes_business_plan
+    data_type: text
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: id
+  type: integer
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: id
+    group: null
+    hidden: true
+    interface: input
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 1
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: id
+    table: investisseurs
+    data_type: integer
+    default_value: nextval('investisseurs_id_seq'::regclass)
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: true
+    is_indexed: false
+    is_primary_key: true
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: true
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: prenom
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: prenom
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      trim: true
+    readonly: false
+    required: true
+    searchable: true
+    sort: 2
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: prenom
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: nom
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: nom
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      trim: true
+    readonly: false
+    required: true
+    searchable: true
+    sort: 3
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: nom
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: email
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: email
+    group: null
+    hidden: false
+    interface: input
+    note: Adresse e-mail renseignée dans le formulaire investisseur.
+    options:
+      trim: true
+    readonly: false
+    required: true
+    searchable: true
+    sort: 4
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: email
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: telephone
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: telephone
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      trim: true
+    readonly: false
+    required: false
+    searchable: true
+    sort: 5
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: telephone
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: entreprise
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: entreprise
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      trim: true
+    readonly: false
+    required: false
+    searchable: true
+    sort: 6
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: entreprise
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: fonction
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: fonction
+    group: null
+    hidden: false
+    interface: input
+    note: null
+    options:
+      trim: true
+    readonly: false
+    required: false
+    searchable: true
+    sort: 7
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: fonction
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: pays
+  type: string
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: null
+    display_options: null
+    field: pays
+    group: null
+    hidden: false
+    interface: input
+    note: Pays de résidence ou d'implantation de l'investisseur.
+    options:
+      trim: true
+    readonly: false
+    required: true
+    searchable: true
+    sort: 8
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: pays
+    table: investisseurs
+    data_type: character varying
+    default_value: null
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: false
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: investisseurs
+  field: date_created
+  type: timestamp
+  meta:
+    collection: investisseurs
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_created
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 9
+    special:
+    - date-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_created
+    table: investisseurs
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: parametres_plateforme
+  field: id
+  type: integer
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: null
+    display_options: null
+    field: id
+    group: null
+    hidden: true
+    interface: input
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 1
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: id
+    table: parametres_plateforme
+    data_type: integer
+    default_value: nextval('parametres_plateforme_id_seq'::regclass)
+    max_length: null
+    numeric_precision: 32
+    numeric_scale: 0
+    is_nullable: false
+    is_unique: true
+    is_indexed: false
+    is_primary_key: true
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: true
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: parametres_plateforme
+  field: user_created
+  type: uuid
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: user
+    display_options: null
+    field: user_created
+    group: null
+    hidden: true
+    interface: select-dropdown-m2o
+    note: null
+    options:
+      template: '{{avatar}} {{first_name}} {{last_name}}'
+    readonly: true
+    required: false
+    searchable: true
+    sort: 2
+    special:
+    - user-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: user_created
+    table: parametres_plateforme
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_users
+    foreign_key_column: id
+- collection: parametres_plateforme
+  field: date_created
+  type: timestamp
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_created
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 3
+    special:
+    - date-created
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_created
+    table: parametres_plateforme
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: parametres_plateforme
+  field: user_updated
+  type: uuid
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: user
+    display_options: null
+    field: user_updated
+    group: null
+    hidden: true
+    interface: select-dropdown-m2o
+    note: null
+    options:
+      template: '{{avatar}} {{first_name}} {{last_name}}'
+    readonly: true
+    required: false
+    searchable: true
+    sort: 4
+    special:
+    - user-updated
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: user_updated
+    table: parametres_plateforme
+    data_type: uuid
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: directus_users
+    foreign_key_column: id
+- collection: parametres_plateforme
+  field: date_updated
+  type: timestamp
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: datetime
+    display_options:
+      relative: true
+    field: date_updated
+    group: null
+    hidden: true
+    interface: datetime
+    note: null
+    options: null
+    readonly: true
+    required: false
+    searchable: true
+    sort: 5
+    special:
+    - date-updated
+    translations: null
+    validation: null
+    validation_message: null
+    width: half
+  schema:
+    name: date_updated
+    table: parametres_plateforme
+    data_type: timestamp with time zone
+    default_value: null
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: parametres_plateforme
+  field: comptes_investisseurs
+  type: boolean
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: null
+    display_options: null
+    field: comptes_investisseurs
+    group: null
+    hidden: false
+    interface: boolean
+    note: null
+    options:
+      label: Comptes investisseurs activés
+    readonly: false
+    required: true
+    searchable: true
+    sort: 6
+    special:
+    - cast-boolean
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: comptes_investisseurs
+    table: parametres_plateforme
+    data_type: boolean
+    default_value: false
+    max_length: null
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+- collection: parametres_plateforme
+  field: mode_acces_business_plan
+  type: string
+  meta:
+    collection: parametres_plateforme
+    conditions: null
+    display: null
+    display_options: null
+    field: mode_acces_business_plan
+    group: null
+    hidden: false
+    interface: select-dropdown
+    note: null
+    options:
+      choices:
+      - text: Désactivé
+        value: desactive
+      - text: Accès immédiat après identification
+        value: direct
+      - text: Validation par un agent
+        value: validation
+    readonly: false
+    required: true
+    searchable: true
+    sort: 7
+    special: null
+    translations: null
+    validation: null
+    validation_message: null
+    width: full
+  schema:
+    name: mode_acces_business_plan
+    table: parametres_plateforme
+    data_type: character varying
+    default_value: validation
+    max_length: 255
+    numeric_precision: null
+    numeric_scale: null
+    is_nullable: true
+    is_unique: false
+    is_indexed: false
+    is_primary_key: false
+    is_generated: false
+    generation_expression: null
+    has_auto_increment: false
+    foreign_key_table: null
+    foreign_key_column: null
+systemFields:
+- collection: directus_activity
+  field: timestamp
+  schema:
+    is_indexed: true
+- collection: directus_oauth_clients
+  field: date_created
+  schema:
+    is_indexed: true
+- collection: directus_oauth_codes
+  field: expires_at
+  schema:
+    is_indexed: true
+- collection: directus_oauth_codes
+  field: used_at
+  schema:
+    is_indexed: true
+- collection: directus_oauth_consents
+  field: client
+  schema:
+    is_indexed: true
+- collection: directus_oauth_tokens
+  field: code_hash
+  schema:
+    is_indexed: true
+- collection: directus_oauth_tokens
+  field: expires_at
+  schema:
+    is_indexed: true
+- collection: directus_oauth_tokens
+  field: previous_session
+  schema:
+    is_indexed: true
+- collection: directus_oauth_tokens
+  field: session
+  schema:
+    is_indexed: true
+- collection: directus_revisions
+  field: activity
+  schema:
+    is_indexed: true
+- collection: directus_revisions
+  field: parent
+  schema:
+    is_indexed: true
+- collection: directus_sessions
+  field: oauth_client
+  schema:
+    is_indexed: true
+relations:
+- collection: PROJETS
+  field: user_updated
+  related_collection: directus_users
+  meta:
+    junction_field: null
+    many_collection: PROJETS
+    many_field: user_updated
+    one_allowed_collections: null
+    one_collection: directus_users
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: PROJETS
+    column: user_updated
+    foreign_key_table: directus_users
+    foreign_key_column: id
+    constraint_name: projets_user_updated_foreign
+    on_update: NO ACTION
+    on_delete: NO ACTION
+- collection: PROJETS
+  field: user_created
+  related_collection: directus_users
+  meta:
+    junction_field: null
+    many_collection: PROJETS
+    many_field: user_created
+    one_allowed_collections: null
+    one_collection: directus_users
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: PROJETS
+    column: user_created
+    foreign_key_table: directus_users
+    foreign_key_column: id
+    constraint_name: projets_user_created_foreign
+    on_update: NO ACTION
+    on_delete: NO ACTION
+- collection: PROJETS
+  field: image_principale
+  related_collection: directus_files
+  meta:
+    junction_field: null
+    many_collection: PROJETS
+    many_field: image_principale
+    one_allowed_collections: null
+    one_collection: directus_files
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: PROJETS
+    column: image_principale
+    foreign_key_table: directus_files
+    foreign_key_column: id
+    constraint_name: projets_image_principale_foreign
+    on_update: NO ACTION
+    on_delete: SET NULL
+- collection: PROJETS
+  field: business_plan
+  related_collection: directus_files
+  meta:
+    junction_field: null
+    many_collection: PROJETS
+    many_field: business_plan
+    one_allowed_collections: null
+    one_collection: directus_files
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: PROJETS
+    column: business_plan
+    foreign_key_table: directus_files
+    foreign_key_column: id
+    constraint_name: projets_business_plan_foreign
+    on_update: NO ACTION
+    on_delete: SET NULL
+- collection: demandes_business_plan
+  field: projet
+  related_collection: PROJETS
+  meta:
+    junction_field: null
+    many_collection: demandes_business_plan
+    many_field: projet
+    one_allowed_collections: null
+    one_collection: PROJETS
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: demandes_business_plan
+    column: projet
+    foreign_key_table: PROJETS
+    foreign_key_column: id
+    constraint_name: demandes_business_plan_projet_foreign
+    on_update: NO ACTION
+    on_delete: RESTRICT
+- collection: demandes_business_plan
+  field: investisseur
+  related_collection: investisseurs
+  meta:
+    junction_field: null
+    many_collection: demandes_business_plan
+    many_field: investisseur
+    one_allowed_collections: null
+    one_collection: investisseurs
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: demandes_business_plan
+    column: investisseur
+    foreign_key_table: investisseurs
+    foreign_key_column: id
+    constraint_name: demandes_business_plan_investisseur_foreign
+    on_update: NO ACTION
+    on_delete: RESTRICT
+- collection: parametres_plateforme
+  field: user_updated
+  related_collection: directus_users
+  meta:
+    junction_field: null
+    many_collection: parametres_plateforme
+    many_field: user_updated
+    one_allowed_collections: null
+    one_collection: directus_users
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: parametres_plateforme
+    column: user_updated
+    foreign_key_table: directus_users
+    foreign_key_column: id
+    constraint_name: parametres_plateforme_user_updated_foreign
+    on_update: NO ACTION
+    on_delete: NO ACTION
+- collection: parametres_plateforme
+  field: user_created
+  related_collection: directus_users
+  meta:
+    junction_field: null
+    many_collection: parametres_plateforme
+    many_field: user_created
+    one_allowed_collections: null
+    one_collection: directus_users
+    one_collection_field: null
+    one_deselect_action: nullify
+    one_field: null
+    sort_field: null
+  schema:
+    table: parametres_plateforme
+    column: user_created
+    foreign_key_table: directus_users
+    foreign_key_column: id
+    constraint_name: parametres_plateforme_user_created_foreign
+    on_update: NO ACTION
+    on_delete: NO ACTION

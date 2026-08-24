@@ -1,0 +1,80 @@
+MISE A JOUR - COMPTES INVESTISSEURS
+===================================
+
+Objectif
+--------
+Ajouter un espace investisseur activable depuis Parametres Plateforme.
+
+Quand Comptes investisseurs = OFF :
+- le fonctionnement actuel reste inchangé ;
+- l'investisseur remplit le formulaire d'identification/demande.
+
+Quand Comptes investisseurs = ON :
+- un bouton "Espace investisseur" apparait sur le frontend ;
+- inscription + connexion ;
+- le compte est lié à la collection investisseurs ;
+- les demandes de Business Plan sont rattachées au compte ;
+- l'investisseur peut suivre ses statuts ;
+- une demande validée peut être téléchargée depuis l'espace investisseur ;
+- la sécurité backend impose le compte lorsque l'option est activée.
+
+Important :
+- le rôle Directus "Investisseur" est créé automatiquement lors de la première inscription ;
+- ce rôle ne reçoit aucune politique d'accès au Data Studio ;
+- les données de l'espace sont servies uniquement par l'endpoint sécurisé ;
+- l'authentification utilise Directus : access token temporaire + refresh token httpOnly.
+
+Cette étape NE met pas encore en place :
+- vérification de l'adresse e-mail à l'inscription ;
+- mot de passe oublié / réinitialisation ;
+Ces éléments seront ajoutés après validation du fonctionnement de base.
+
+INSTALLATION
+------------
+1) Sauvegarde PostgreSQL recommandée avant le schéma :
+
+New-Item -ItemType Directory -Force .\backups | Out-Null
+
+docker compose exec database sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" > /tmp/avant_comptes_investisseurs.sql'
+
+docker compose cp database:/tmp/avant_comptes_investisseurs.sql .\backups\avant_comptes_investisseurs.sql
+
+2) Copier le schéma dans Directus :
+
+docker compose cp .\schema\schema_comptes_investisseurs.yaml directus:/directus/schema_comptes_investisseurs.yaml
+
+3) Dry-run :
+
+docker compose exec directus node /directus/cli.js schema apply --dry-run /directus/schema_comptes_investisseurs.yaml
+
+Le résultat attendu est principalement :
+- Update investisseurs (note uniquement)
+- Create investisseurs.directus_user
+- Create relation investisseurs.directus_user -> directus_users.id
+Aucune suppression ne doit être annoncée.
+
+4) Après validation du dry-run :
+
+docker compose exec directus node /directus/cli.js schema apply /directus/schema_comptes_investisseurs.yaml
+
+5) Reconstruire/redémarrer :
+
+docker compose up -d --build
+
+docker compose ps
+
+TEST
+----
+1. Dans Directus > Parametres Plateforme : cocher "Comptes investisseurs activés" et enregistrer.
+2. Ouvrir le frontend : http://localhost:5173
+3. Le bouton "Espace investisseur" doit apparaître.
+4. Créer un compte test avec un e-mail différent d'un compte Directus agent/admin.
+5. Après inscription, la connexion doit être automatique.
+6. Dans Directus :
+   - un utilisateur Directus doit exister pour le compte ;
+   - un rôle "Investisseur" doit avoir été créé à la première inscription ;
+   - la ligne correspondante dans Investisseurs doit contenir le champ Compte Directus.
+7. Depuis le frontend, demander un Business Plan.
+8. Ouvrir l'espace investisseur : la demande doit apparaître avec son statut.
+9. En mode validation, valider depuis Directus puis actualiser l'espace investisseur.
+10. Le bouton Télécharger doit devenir disponible.

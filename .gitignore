@@ -2,3 +2,6 @@
 uploads/*
 !uploads/.gitkeep
 node_modules/
+backups/
+*.zip
+backups/

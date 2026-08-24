@@ -218,3 +218,225 @@ main { flex: 1; }
   .modal { padding: 25px 18px 20px; }
   .footer-grid { align-items: flex-start; flex-direction: column; }
 }
+
+/* Workflow Business Plan */
+.business-plan-download {
+  width: 100%;
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.access-notice {
+  margin: 12px 0 0;
+}
+
+/* Espace investisseur */
+.investor-space-link {
+  border: 1px solid rgba(255,255,255,.26) !important;
+  border-radius: 999px;
+  padding: 9px 13px !important;
+}
+
+.investor-account-modal {
+  width: min(860px, 100%);
+}
+
+.account-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 22px;
+  padding: 5px;
+  border-radius: 12px;
+  background: #eef4f6;
+}
+
+.account-tabs button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #526a78;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.account-tabs button.active {
+  background: white;
+  color: var(--cri-blue);
+  box-shadow: 0 3px 12px rgba(6,52,79,.08);
+}
+
+.account-summary {
+  display: grid;
+  grid-template-columns: 1.5fr .5fr;
+  gap: 12px;
+  margin: 22px 0 26px;
+}
+
+.account-summary > div {
+  padding: 15px;
+  border: 1px solid #dce7eb;
+  border-radius: 14px;
+  background: #f7fafb;
+}
+
+.account-summary span {
+  display: block;
+  margin-bottom: 5px;
+  color: #748794;
+  font-size: 11px;
+}
+
+.account-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 22px 0 10px;
+}
+
+.account-section-heading h3 {
+  margin: 0;
+}
+
+.account-profile-heading {
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid #e3ecef;
+}
+
+.text-button {
+  border: 0;
+  background: transparent;
+  color: var(--cri-teal-dark);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.account-requests {
+  display: grid;
+  gap: 10px;
+}
+
+.account-request {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid #dce7eb;
+  border-radius: 14px;
+  background: white;
+}
+
+.account-request h4 {
+  margin: 8px 0 4px;
+  color: #173c55;
+}
+
+.account-request p {
+  margin: 0;
+  color: #78909d;
+  font-size: 12px;
+}
+
+.request-status {
+  display: inline-flex;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+  background: #eef3f5;
+  color: #536a77;
+}
+
+.request-status-validee { background: #e8f7ee; color: #276747; }
+.request-status-refusee { background: #fff0f0; color: #914040; }
+.request-status-telechargee { background: #e8f2ff; color: #2d5f8d; }
+.request-status-demandee { background: #fff6df; color: #80631e; }
+
+.account-download {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.account-empty {
+  padding: 18px;
+  border: 1px dashed #cbdbe1;
+  border-radius: 13px;
+  color: #6f8490;
+  background: #f9fbfc;
+}
+
+.account-logout {
+  width: 100%;
+  margin-top: 24px;
+  color: #173c55;
+  border: 1px solid #cbdbe1;
+  background: #f3f7f9;
+}
+
+.account-logout:hover {
+  background: #e7f0f3;
+}
+
+.account-request-confirmation {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px solid #d5e5e9;
+  border-radius: 14px;
+  background: #f5fafb;
+}
+
+.account-request-confirmation > span,
+.account-request-confirmation > small {
+  color: #718793;
+}
+
+.account-request-confirmation > strong {
+  color: #173c55;
+  font-size: 19px;
+}
+
+.account-request-confirmation p {
+  margin: 10px 0 0;
+  color: #58727f;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+@media (max-width: 650px) {
+  .investor-space-link { padding: 8px 10px !important; }
+  .account-summary { grid-template-columns: 1fr; }
+  .account-request { align-items: flex-start; flex-direction: column; }
+  .account-download { width: 100%; }
+}
+
+/* Vérification e-mail et récupération de compte investisseur */
+.account-inline-link {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin-top: 0.2rem;
+  color: var(--teal, #0b9fa5);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.account-inline-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.account-resend-link,
+.account-back-link {
+  margin-top: 0.85rem;
+}

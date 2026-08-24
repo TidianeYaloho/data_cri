@@ -1,0 +1,16 @@
+{
+  "name": "directus-extension-workflow-business-plan",
+  "version": "1.0.0",
+  "type": "module",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "hook"
+  ],
+  "directus:extension": {
+    "type": "hook",
+    "path": "dist/index.js",
+    "source": "src/index.js",
+    "host": "^12.0.0"
+  }
+}

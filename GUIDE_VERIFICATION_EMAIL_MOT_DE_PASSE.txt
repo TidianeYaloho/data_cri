@@ -1,0 +1,83 @@
+MISE A JOUR - VERIFICATION E-MAIL + MOT DE PASSE OUBLIE
+========================================================
+
+Cette mise à jour vient APRES le patch Comptes investisseurs.
+Ne supprimez pas le dossier CRI_Projets existant : extraire le ZIP par-dessus le projet.
+
+NOUVEAUTES
+-----------
+1. Toute NOUVELLE inscription investisseur crée un compte Directus au statut "unverified".
+2. Un e-mail de vérification est envoyé via Mailpit en local.
+3. Le compte ne peut se connecter qu'après clic sur le lien de vérification.
+4. Le lien de vérification est temporaire et son jeton brut n'est jamais stocké en base : seule son empreinte SHA-256 est enregistrée.
+5. L'utilisateur peut demander le renvoi du message de vérification.
+6. "Mot de passe oublié ?" envoie un e-mail de réinitialisation via le mécanisme natif Directus.
+7. Le nouveau mot de passe est saisi sur le frontend CRI, sans exposer l'interface d'administration Directus.
+
+NOUVEAUX CHAMPS DANS investisseurs
+-----------------------------------
+- email_verification_token_hash (technique, caché)
+- email_verification_expires_at (technique, caché)
+- email_verifie_at (visible en lecture)
+
+IMPORTANT
+---------
+Les comptes de test créés AVANT cette mise à jour sont déjà actifs. Ils ne seront pas rétroactivement bloqués.
+Pour tester la vérification e-mail, créer un NOUVEAU compte avec une nouvelle adresse e-mail.
+
+COMMANDES CONSEILLEES
+---------------------
+Depuis la racine CRI_Projets :
+
+1) Sauvegarde PostgreSQL
+   docker compose exec database sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" > /tmp/avant_verification_email.sql'
+   docker compose cp database:/tmp/avant_verification_email.sql .\backups\avant_verification_email.sql
+
+2) Copier le snapshot Directus
+   docker compose cp .\schema\schema_verification_email_mot_de_passe.yaml directus:/directus/schema_verification_email_mot_de_passe.yaml
+
+3) Dry-run (NE MODIFIE RIEN)
+   docker compose exec directus node /directus/cli.js schema apply --dry-run /directus/schema_verification_email_mot_de_passe.yaml
+
+Le dry-run attendu doit uniquement :
+- mettre à jour la note de la collection investisseurs ;
+- créer les 3 champs listés plus haut.
+Aucune suppression de champ/collection/relation n'est attendue.
+
+4) Après validation du dry-run :
+   docker compose exec directus node /directus/cli.js schema apply /directus/schema_verification_email_mot_de_passe.yaml
+
+5) Reconstruire / redémarrer :
+   docker compose up -d --build
+   docker compose ps
+
+TEST VERIFICATION E-MAIL
+------------------------
+- Directus > Parametres Plateforme > Comptes investisseurs activés.
+- Frontend > Espace investisseur > Créer un compte.
+- Utiliser une NOUVELLE adresse e-mail.
+- Le frontend doit indiquer qu'un e-mail de vérification a été envoyé.
+- Ouvrir Mailpit : http://localhost:8025
+- Cliquer sur le lien reçu.
+- Le frontend doit annoncer que l'adresse est vérifiée.
+- La connexion avec le compte doit alors fonctionner.
+- Dans Directus > Investisseurs, email_verifie_at doit être renseigné pour ce nouveau compte.
+
+TEST MOT DE PASSE OUBLIE
+------------------------
+- Se déconnecter.
+- Espace investisseur > Connexion > Mot de passe oublié ?
+- Saisir l'adresse du compte vérifié.
+- Ouvrir Mailpit et cliquer sur le lien de réinitialisation.
+- Choisir un nouveau mot de passe (10 caractères minimum).
+- Vérifier que l'ancien mot de passe ne fonctionne plus et que le nouveau fonctionne.
+
+PARAMETRES LOCAUX AJOUTES
+-------------------------
+- PASSWORD_RESET_URL_ALLOW_LIST=http://localhost:5173
+- INVESTOR_EMAIL_VERIFICATION_TTL_HOURS=24
+- RATE_LIMITER_EMAIL_ENABLED=true
+- RATE_LIMITER_EMAIL_POINTS=20
+- RATE_LIMITER_EMAIL_DURATION=60
+
+En production, remplacer les URLs localhost et la configuration Mailpit par les vraies URLs HTTPS et le SMTP officiel.

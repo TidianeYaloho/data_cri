@@ -1,4 +1,4 @@
-import { directusAssetUrl } from '../api/directus.js';
+import { projectImageUrl } from '../api/directus.js';
 import SectorIcon from './SectorIcon.jsx';
 
 function formatMoney(value) {
@@ -19,12 +19,7 @@ function label(value) {
 }
 
 export default function ProjectCard({ project, onOpen }) {
-  const imageUrl = directusAssetUrl(project.image_principale, {
-    width: 800,
-    height: 480,
-    fit: 'cover',
-    quality: 82,
-  });
+  const imageUrl = project.has_image ? projectImageUrl(project.id) : '';
 
   return (
     <article className="project-card">
@@ -47,7 +42,9 @@ export default function ProjectCard({ project, onOpen }) {
         </div>
 
         <h3>{project.titre}</h3>
-        <p className="project-description">{project.description || 'Description à compléter.'}</p>
+        <p className="project-description">
+          {project.description || 'Description à compléter.'}
+        </p>
 
         <div className="project-kpis">
           <div>

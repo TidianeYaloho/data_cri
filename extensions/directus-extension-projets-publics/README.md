@@ -1,24 +1,16 @@
 # Extension Directus — projets-publics
 
-Cette extension ajoute l'endpoint public :
+Endpoints publics contrôlés :
 
-GET /projets-publics
+- `GET /projets-publics`
+- `GET /projets-publics/:id/image`
 
-Il renvoie uniquement les projets de la collection `PROJETS` dont
-`statut_publication = publie`, et seulement les champs nécessaires au frontend.
+Le catalogue renvoie uniquement les projets de la collection `PROJETS` dont
+`status_publication = publie` et qui ne sont pas archivés.
 
-Le champ `business_plan` n'est jamais renvoyé.
+Le champ `business_plan` n'est jamais renvoyé. Le UUID de `image_principale`
+n'est pas renvoyé non plus : le catalogue reçoit seulement `has_image`, puis
+l'image est diffusée par la seconde route après nouvelle vérification du projet.
 
-## Installation locale
-
-Copier le dossier `directus-extension-projets-publics` directement dans :
-
-CRI_Projets/extensions/
-
-Puis redémarrer Directus :
-
-docker compose restart directus
-
-Test dans le navigateur :
-
-http://localhost:8055/projets-publics
+Il n'est donc pas nécessaire de rendre toute la collection `directus_files`
+lisible publiquement pour afficher les images des projets.

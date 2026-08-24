@@ -1,0 +1,32 @@
+CORRECTION - VERIFICATION E-MAIL RESTEE BLOQUEE
+
+Cause : en mode développement, React StrictMode exécute certains effets deux fois.
+L'ancien code lançait la vérification lors du premier passage puis annulait uniquement
+la mise à jour de l'interface pendant le cycle de contrôle de StrictMode. Le serveur
+pouvait donc valider l'adresse, tandis que l'écran restait sur « Vérification... ».
+
+Ce correctif :
+- n'envoie qu'une seule requête de vérification ;
+- réutilise cette même requête pendant le second passage de StrictMode ;
+- met correctement l'écran à jour lorsque la vérification se termine ;
+- permet d'afficher l'espace investisseur après connexion ;
+- corrige aussi le même blocage potentiel après une réinitialisation de mot de passe.
+
+INSTALLATION
+Depuis la racine CRI_Projets :
+
+Expand-Archive -Path .\CRI_Projets_correction_verification_email_bloquee.zip -DestinationPath . -Force
+
+docker compose up -d --build frontend
+
+Puis faire Ctrl+F5 sur http://localhost:5173
+
+TEST IMMEDIAT
+Le premier clic effectué avant ce correctif a probablement déjà activé le compte côté serveur.
+Après installation, recharge la page puis tente simplement de te connecter avec le compte créé.
+
+Si la connexion échoue encore, vérifier le statut du compte avec :
+
+docker compose exec database psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT email,status FROM directus_users ORDER BY date_created DESC LIMIT 10;"
+
+Le nouveau compte doit avoir status = active après vérification.

@@ -1,4 +1,9 @@
-export default function Header({ onHome }) {
+export default function Header({
+  onHome,
+  accountsEnabled,
+  investorAccount,
+  onInvestorAccount,
+}) {
   return (
     <header className="site-header">
       <div className="container header-inner">
@@ -14,6 +19,19 @@ export default function Header({ onHome }) {
 
         <nav className="header-nav" aria-label="Navigation du module">
           <button type="button" onClick={onHome}>Projets</button>
+
+          {accountsEnabled && (
+            <button
+              className="investor-space-link"
+              type="button"
+              onClick={onInvestorAccount}
+            >
+              {investorAccount?.profil
+                ? `Mon espace · ${investorAccount.profil.prenom}`
+                : 'Espace investisseur'}
+            </button>
+          )}
+
           <a href="https://guelmiminvest.ma/" target="_blank" rel="noreferrer">Site du CRI</a>
         </nav>
       </div>

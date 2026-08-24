@@ -1,0 +1,234 @@
+MISE À JOUR — WORKFLOW BUSINESS PLAN SÉCURISÉ
+==============================================
+
+Ce guide s'applique à la version du projet reçue le 20/08/2026.
+La version de référence avant modification est le commit GitHub 864b93d.
+
+IMPORTANT
+---------
+- Ne remplace jamais ton fichier .env par .env.example.
+- Ne lance jamais "docker compose down -v" pendant cette mise à jour.
+- Le fichier .env.example est seulement un modèle ; les valeurs locales Mailpit
+  ont des valeurs par défaut dans compose.yml, donc aucun secret n'est requis
+  pour le premier test local.
+
+
+1) FAIRE AUSSI UNE SAUVEGARDE DE LA BASE POSTGRESQL
+----------------------------------------------------
+GitHub sauvegarde le code, mais pas les lignes présentes dans PostgreSQL.
+Depuis la racine CRI_Projets :
+
+   New-Item -ItemType Directory -Force .\backups | Out-Null
+
+   docker compose exec database sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" > /tmp/avant_workflow_bp.sql'
+
+   docker compose cp database:/tmp/avant_workflow_bp.sql .\backups\avant_workflow_bp.sql
+
+   docker compose exec database rm -f /tmp/avant_workflow_bp.sql
+
+Le dossier backups/ est ignoré par Git afin que ce dump, qui peut contenir des
+informations personnelles, ne soit pas envoyé sur GitHub.
+
+
+2) APPLIQUER LE NOUVEAU SCHÉMA DIRECTUS
+---------------------------------------
+Le fichier à appliquer est :
+
+   schema\schema_workflow_business_plan.yaml
+
+Copier le snapshot dans le conteneur Directus :
+
+   docker compose cp .\schema\schema_workflow_business_plan.yaml directus:/directus/schema_workflow_business_plan.yaml
+
+Vérification SANS modifier la base :
+
+   docker compose exec directus node /directus/cli.js schema apply --dry-run /directus/schema_workflow_business_plan.yaml
+
+Le dry-run doit essentiellement annoncer :
+- l'ajout de 7 champs dans demandes_business_plan ;
+- la contrainte unique sur access_token_hash ;
+- la mise à jour de la note descriptive de la collection.
+
+Les 7 nouveaux champs sont :
+- access_token_hash
+- access_expires_at
+- date_decision
+- date_telechargement
+- notification_email_statut
+- notification_email_date
+- notification_email_erreur
+
+SI le dry-run annonce la suppression d'une collection existante ou de champs
+que tu utilises déjà, NE PAS appliquer et me montrer le résultat.
+
+Si le dry-run est conforme, appliquer :
+
+   docker compose exec directus node /directus/cli.js schema apply /directus/schema_workflow_business_plan.yaml
+
+Aucun de ces nouveaux champs ne doit être créé manuellement dans Directus.
+
+
+3) RECRÉER/DÉMARRER LES SERVICES
+---------------------------------
+Le nouveau compose ajoute Mailpit et charge les nouvelles extensions :
+
+   docker compose up -d --build
+
+Puis :
+
+   docker compose ps
+
+Services attendus :
+- database
+- mailpit
+- directus
+- frontend
+
+Mailpit est volontairement accessible seulement depuis ce PC sur :
+   http://localhost:8025
+
+Son port SMTP 1025 reste interne au réseau Docker.
+
+
+4) VÉRIFIER LE CHARGEMENT DES EXTENSIONS
+----------------------------------------
+
+   docker compose logs directus --tail 120
+
+Les extensions suivantes doivent notamment apparaître comme chargées :
+- directus-extension-projets-publics
+- directus-extension-parametres-publics
+- directus-extension-demande-business-plan
+- directus-extension-acces-business-plan
+- directus-extension-workflow-business-plan
+
+Si Directus affiche une erreur au chargement d'une extension, ne pas poursuivre
+le test fonctionnel avant correction.
+
+
+5) VÉRIFICATION À FAIRE DANS DIRECTUS
+-------------------------------------
+Dans Paramètres > Accès / rôle Public, ne donne PAS un accès public global à
+la collection système directus_files.
+
+Les images publiques passent désormais par une route contrôlée, et les Business
+Plans passent par une route avec token sécurisé. Il n'est donc pas nécessaire
+que directus_files soit lisible publiquement.
+
+Dans Paramètres Plateforme, vérifier que les trois choix existent toujours :
+- Désactivé (valeur technique : desactive)
+- Accès immédiat après identification (valeur technique : direct)
+- Validation par un agent (valeur technique : validation)
+
+
+6) TEST DU MODE "VALIDATION PAR UN AGENT"
+------------------------------------------
+Dans Directus > Paramètres Plateforme :
+- Mode Accès Business Plan = Validation par un agent
+
+Vérifier qu'un projet PUBLIÉ possède bien un fichier dans son champ business_plan.
+
+Sur :
+   http://localhost:5173
+
+- ouvrir ce projet ;
+- cliquer sur "Demander le Business Plan" ;
+- envoyer une demande avec une adresse e-mail de test.
+
+Dans Directus > Demandes Business Plan :
+- ouvrir la nouvelle demande ;
+- changer Statut : Demandée -> Validée ;
+- Enregistrer.
+
+Ouvrir ensuite :
+   http://localhost:8025
+
+Un e-mail de validation doit apparaître dans Mailpit.
+L'e-mail contient un lien temporaire dont le token brut n'est pas stocké en base.
+
+Cliquer sur ce lien :
+- le Business Plan doit être téléchargé ;
+- actualiser ensuite la demande dans Directus ;
+- Statut doit être "Téléchargée" ;
+- Date Téléchargement doit être renseignée.
+
+
+7) TEST DU REFUS
+----------------
+Créer une NOUVELLE demande, puis dans Directus :
+- Statut : Demandée -> Refusée
+- Enregistrer
+
+Mailpit doit recevoir un e-mail de refus.
+Aucun lien de téléchargement ne doit être généré.
+
+
+8) TEST DU MODE "ACCÈS IMMÉDIAT"
+---------------------------------
+Dans Paramètres Plateforme :
+- Mode Accès Business Plan = Accès immédiat après identification
+
+Le frontend relit les paramètres automatiquement au maximum toutes les
+15 secondes et les revérifie avant d'ouvrir le formulaire.
+
+Envoyer le formulaire :
+- la demande est enregistrée comme Validée ;
+- un bouton "Télécharger le Business Plan" apparaît immédiatement ;
+- aucun e-mail de décision agent n'est requis dans ce mode.
+
+Après le téléchargement, la demande doit passer à "Téléchargée".
+
+
+9) TEST DU MODE "DÉSACTIVÉ"
+----------------------------
+Dans Paramètres Plateforme :
+- Mode Accès Business Plan = Désactivé
+
+Le bouton public doit devenir indisponible.
+Si le formulaire était déjà ouvert au moment du changement, le frontend le
+ferme après actualisation des paramètres. Même en cas d'interface obsolète,
+le backend refuse la demande.
+
+Un ancien lien sécurisé est également bloqué tant que le mode est désactivé.
+
+
+10) TEST DE SÉCURITÉ DU FICHIER BUSINESS PLAN
+---------------------------------------------
+Depuis Directus, récupérer seulement pour le test l'identifiant UUID d'un
+Business Plan. Dans une fenêtre privée / navigation privée NON connectée à
+Directus, essayer :
+
+   http://localhost:8055/assets/UUID_DU_BUSINESS_PLAN
+
+Le document ne doit pas être accessible publiquement.
+Le téléchargement normal doit fonctionner uniquement avec le lien
+/business-plan-access/<token> obtenu par le workflow ci-dessus.
+
+
+11) APRÈS VALIDATION DES TESTS
+------------------------------
+Faire un nouveau snapshot de l'état RÉEL de Directus :
+
+   docker compose exec directus node /directus/cli.js schema snapshot --yes /directus/schema_actuel.yaml
+
+   docker compose cp directus:/directus/schema_actuel.yaml .\schema\schema_actuel.yaml
+
+Puis vérifier :
+
+   git status
+
+Sauvegarder la nouvelle version :
+
+   git add .
+   git commit -m "Ajout workflow securise Business Plan et Mailpit"
+   git push
+
+
+12) CE QUI RESTERA POUR LA PHASE SUIVANTE
+-----------------------------------------
+- comptes et espace investisseurs ;
+- interface agent dédiée avec boutons Valider / Refuser ;
+- notifications internes aux agents ;
+- SMTP réel et adresse officielle du CRI ;
+- durcissement production : HTTPS, reverse proxy, sauvegardes automatiques,
+  limitation des requêtes, supervision et politique de conservation des données.

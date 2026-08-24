@@ -19,6 +19,23 @@ services:
       retries: 5
 
 
+  mailpit:
+    image: axllent/mailpit:v1.30.6
+    restart: unless-stopped
+
+    # Interface de test visible uniquement depuis ce PC.
+    # Le port SMTP 1025 reste interne au réseau Docker.
+    ports:
+      - "127.0.0.1:8025:8025"
+
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+
   directus:
     image: directus/directus:12.2.0
     restart: unless-stopped
@@ -28,6 +45,8 @@ services:
 
     depends_on:
       database:
+        condition: service_healthy
+      mailpit:
         condition: service_healthy
 
     environment:
@@ -42,9 +61,48 @@ services:
 
       WEBSOCKETS_ENABLED: "true"
 
-      # Autorise le frontend local à appeler Directus
+      # URL publique de Directus. En local, elle sert aussi à construire
+      # les liens sécurisés envoyés par e-mail.
+      PUBLIC_URL: "${DIRECTUS_PUBLIC_URL:-http://localhost:8055}"
+
+      # Autorise le frontend local à appeler Directus.
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "http://localhost:5173"
+      CORS_ORIGIN: "${FRONTEND_PUBLIC_URL:-http://localhost:5173}"
+      CORS_CREDENTIALS: "${CORS_CREDENTIALS:-true}"
+
+      # URL du frontend utilisée par les liens de vérification et de récupération.
+      FRONTEND_PUBLIC_URL: "${FRONTEND_PUBLIC_URL:-http://localhost:5173}"
+
+      # Directus autorise le lien de réinitialisation uniquement vers cette URL.
+      PASSWORD_RESET_URL_ALLOW_LIST: "${PASSWORD_RESET_URL_ALLOW_LIST:-http://localhost:5173}"
+
+      # Auth investisseur : le refresh token reste dans un cookie httpOnly.
+      # En local HTTP : secure=false. En production HTTPS : secure=true.
+      REFRESH_TOKEN_COOKIE_SECURE: "${REFRESH_TOKEN_COOKIE_SECURE:-false}"
+      REFRESH_TOKEN_COOKIE_SAME_SITE: "${REFRESH_TOKEN_COOKIE_SAME_SITE:-lax}"
+
+      # E-mails de développement : Directus envoie vers Mailpit.
+      # En production, ces valeurs pourront être remplacées par un SMTP réel
+      # dans le fichier .env sans modifier le code.
+      EMAIL_TRANSPORT: "${EMAIL_TRANSPORT:-smtp}"
+      EMAIL_FROM: "${EMAIL_FROM:-no-reply@cri.local}"
+      EMAIL_SMTP_HOST: "${EMAIL_SMTP_HOST:-mailpit}"
+      EMAIL_SMTP_PORT: "${EMAIL_SMTP_PORT:-1025}"
+      EMAIL_SMTP_USER: "${EMAIL_SMTP_USER:-}"
+      EMAIL_SMTP_PASSWORD: "${EMAIL_SMTP_PASSWORD:-}"
+      EMAIL_SMTP_SECURE: "${EMAIL_SMTP_SECURE:-false}"
+      EMAIL_SMTP_IGNORE_TLS: "${EMAIL_SMTP_IGNORE_TLS:-true}"
+
+      # Durée de validité d'un lien Business Plan (7 jours par défaut).
+      BUSINESS_PLAN_LINK_TTL_HOURS: "${BUSINESS_PLAN_LINK_TTL_HOURS:-168}"
+      CRI_CONTACT_EMAIL: "${CRI_CONTACT_EMAIL:-contact@cri.local}"
+      INVESTOR_ROLE_NAME: "${INVESTOR_ROLE_NAME:-Investisseur}"
+      INVESTOR_EMAIL_VERIFICATION_TTL_HOURS: "${INVESTOR_EMAIL_VERIFICATION_TTL_HOURS:-24}"
+
+      # Limite les rafales d'e-mails de vérification/récupération en production comme en local.
+      RATE_LIMITER_EMAIL_ENABLED: "${RATE_LIMITER_EMAIL_ENABLED:-true}"
+      RATE_LIMITER_EMAIL_POINTS: "${RATE_LIMITER_EMAIL_POINTS:-20}"
+      RATE_LIMITER_EMAIL_DURATION: "${RATE_LIMITER_EMAIL_DURATION:-60}"
 
     volumes:
       - ./uploads:/directus/uploads
@@ -66,9 +124,7 @@ services:
       - /app/node_modules
 
     environment:
-      VITE_DIRECTUS_URL: "http://localhost:8055"
-      VITE_USE_MOCK_DATA: "false"
-      VITE_ENABLE_REQUESTS: "false"
+      VITE_DIRECTUS_URL: "${DIRECTUS_PUBLIC_URL:-http://localhost:8055}"
 
     depends_on:
       - directus
