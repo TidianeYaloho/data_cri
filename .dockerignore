@@ -1,0 +1,8 @@
+﻿.env
+.git
+.gitignore
+backups
+uploads
+frontend/node_modules
+node_modules
+*.zip

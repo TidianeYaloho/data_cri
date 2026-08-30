@@ -67,7 +67,7 @@ services:
 
       # Autorise le frontend local à appeler Directus.
       CORS_ENABLED: "true"
-      CORS_ORIGIN: "${FRONTEND_PUBLIC_URL:-http://localhost:5173}"
+      CORS_ORIGIN: "${CORS_ORIGIN:-array:http://localhost:5173,http://localhost:5174}"
       CORS_CREDENTIALS: "${CORS_CREDENTIALS:-true}"
 
       # URL du frontend utilisée par les liens de vérification et de récupération.
