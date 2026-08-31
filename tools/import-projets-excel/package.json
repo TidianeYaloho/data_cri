@@ -1,0 +1,7 @@
+{
+  "name": "cri-import-projets-excel",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test", "import": "node import.mjs" },
+  "dependencies": { "xlsx": "^0.18.5" }
+}
