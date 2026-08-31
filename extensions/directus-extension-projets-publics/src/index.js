@@ -21,6 +21,8 @@ export default {
             'filiere',
             'description',
             'province',
+            'provinces',
+            'type_projet',
             'investissement_mad',
             'nombre_postes',
             'status_publication',

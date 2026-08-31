@@ -1,5 +1,6 @@
 import { projectImageUrl } from '../api/directus.js';
 import SectorIcon from './SectorIcon.jsx';
+import { projectProvinceLabel, projectTypeLabel } from '../utils/projectFields.js';
 
 function formatMoney(value) {
   if (value === null || value === undefined || value === '') return 'À préciser';
@@ -38,8 +39,12 @@ export default function ProjectCard({ project, onOpen }) {
       <div className="project-card-body">
         <div className="project-meta-line">
           <span className="sector-pill">{label(project.secteur)}</span>
-          <span>{project.province || 'Guelmim-Oued Noun'}</span>
+          <span>{projectProvinceLabel(project, 'Guelmim-Oued Noun')}</span>
         </div>
+
+        {projectTypeLabel(project.type_projet) && (
+          <p className="project-type">{projectTypeLabel(project.type_projet)}</p>
+        )}
 
         <h3>{project.titre}</h3>
         <p className="project-description">
@@ -52,7 +57,7 @@ export default function ProjectCard({ project, onOpen }) {
             <strong>{formatMoney(project.investissement_mad)}</strong>
           </div>
           <div>
-            <span>Postes</span>
+            <span>Emplois</span>
             <strong>{project.nombre_postes ?? '—'}</strong>
           </div>
         </div>

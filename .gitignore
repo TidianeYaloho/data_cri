@@ -2,6 +2,7 @@
 uploads/*
 !uploads/.gitkeep
 node_modules/
+frontend/dist/
 backups/
 *.zip
 backups/

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { projectImageUrl } from '../api/directus.js';
 import RequestModal from '../components/RequestModal.jsx';
 import SectorIcon from '../components/SectorIcon.jsx';
+import { projectProvinceLabel, projectTypeLabel } from '../utils/projectFields.js';
 
 function formatMoney(value) {
   if (value === null || value === undefined || value === '') {
@@ -163,7 +164,10 @@ export default function ProjetDetailPage({
             <div className="detail-copy">
               <div className="detail-tags">
                 <span>{label(project.secteur)}</span>
-                <span>{project.province || 'Guelmim-Oued Noun'}</span>
+                <span>{projectProvinceLabel(project, 'Guelmim-Oued Noun')}</span>
+                {projectTypeLabel(project.type_projet) && (
+                  <span>{projectTypeLabel(project.type_projet)}</span>
+                )}
               </div>
 
               <p className="project-detail-code">
@@ -212,7 +216,7 @@ export default function ProjetDetailPage({
 
               <div>
                 <span>Province</span>
-                <strong>{project.province || 'À préciser'}</strong>
+                <strong>{projectProvinceLabel(project)}</strong>
               </div>
 
               <div>
@@ -231,7 +235,7 @@ export default function ProjetDetailPage({
             </div>
 
             <div className="investment-stat">
-              <span>Nombre de postes</span>
+              <span>Nombre d'emplois</span>
               <strong>{project.nombre_postes ?? 'À préciser'}</strong>
             </div>
 
