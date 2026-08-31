@@ -7,8 +7,8 @@ const initialForm = {
   email: '',
   telephone: '',
   entreprise: '',
-  fonction: '',
-  pays: 'Maroc',
+  secteur: '',
+  province: 'Guelmim',
 };
 
 function isImmediateMode(mode) {
@@ -224,7 +224,7 @@ export default function RequestModal({
               </label>
 
               <label>
-                Entreprise
+                Entreprise / Porteur de projet
                 <input
                   name="entreprise"
                   value={form.entreprise}
@@ -233,17 +233,14 @@ export default function RequestModal({
               </label>
 
               <label>
-                Fonction
-                <input
-                  name="fonction"
-                  value={form.fonction}
-                  onChange={updateField}
-                />
+                Secteur
+                <input required name="secteur" value={form.secteur} onChange={updateField} />
               </label>
-
-              <label className="form-full">
-                Pays
-                <input required name="pays" value={form.pays} onChange={updateField} />
+              <label>
+                Province
+                <select required name="province" value={form.province} onChange={updateField}>
+                  {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                </select>
               </label>
             </div>
           )}

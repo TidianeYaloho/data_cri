@@ -19,8 +19,8 @@ const initialRegisterForm = {
   password: '',
   telephone: '',
   entreprise: '',
-  fonction: '',
-  pays: 'Maroc',
+  secteur: '',
+  province: 'Guelmim',
 };
 
 const statusLabels = {
@@ -84,8 +84,8 @@ export default function InvestorAccountModal({
         nom: account.profil.nom || '',
         telephone: account.profil.telephone || '',
         entreprise: account.profil.entreprise || '',
-        fonction: account.profil.fonction || '',
-        pays: account.profil.pays || '',
+        secteur: account.profil.secteur || '',
+        province: account.profil.province || 'Guelmim',
       });
     }
   }, [account]);
@@ -520,16 +520,18 @@ export default function InvestorAccountModal({
                     <input name="telephone" value={profileForm.telephone} onChange={updateProfile} />
                   </label>
                   <label>
-                    Entreprise
+                    Entreprise / Porteur de projet
                     <input name="entreprise" value={profileForm.entreprise} onChange={updateProfile} />
                   </label>
                   <label>
-                    Fonction
-                    <input name="fonction" value={profileForm.fonction} onChange={updateProfile} />
+                    Secteur
+                    <input required name="secteur" value={profileForm.secteur} onChange={updateProfile} />
                   </label>
                   <label>
-                    Pays
-                    <input required name="pays" value={profileForm.pays} onChange={updateProfile} />
+                    Province
+                    <select required name="province" value={profileForm.province} onChange={updateProfile}>
+                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                    </select>
                   </label>
                 </div>
                 <button
@@ -688,16 +690,18 @@ export default function InvestorAccountModal({
                     <input name="telephone" value={registerForm.telephone} onChange={updateRegister} />
                   </label>
                   <label>
-                    Entreprise
+                    Entreprise / Porteur de projet
                     <input name="entreprise" value={registerForm.entreprise} onChange={updateRegister} />
                   </label>
                   <label>
-                    Fonction
-                    <input name="fonction" value={registerForm.fonction} onChange={updateRegister} />
+                    Secteur
+                    <input required name="secteur" value={registerForm.secteur} onChange={updateRegister} />
                   </label>
                   <label>
-                    Pays
-                    <input required name="pays" value={registerForm.pays} onChange={updateRegister} />
+                    Province
+                    <select required name="province" value={registerForm.province} onChange={updateRegister}>
+                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                    </select>
                   </label>
                 </div>
                 <button

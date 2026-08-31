@@ -7,6 +7,7 @@ const normalizeEmail = (value) =>
   normalizeText(value).toLowerCase();
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OFFICIAL_PROVINCES = new Set(['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan']);
 
 const INVESTOR_FIELD_MAX_LENGTH = 255;
 
@@ -114,6 +115,8 @@ export default {
               'entreprise',
               'fonction',
               'pays',
+              'secteur',
+              'province',
             ])
             .where('directus_user', userId)
             .first();
@@ -136,12 +139,14 @@ export default {
             entreprise: normalizeText(sourceInvestor.entreprise) || null,
             fonction: normalizeText(sourceInvestor.fonction) || null,
             pays: normalizeText(sourceInvestor.pays),
+            secteur: normalizeText(sourceInvestor.secteur),
+            province: normalizeText(sourceInvestor.province),
           };
 
-          if (!investor.prenom || !investor.nom || !investor.email || !investor.pays) {
+          if (!investor.prenom || !investor.nom || !investor.email || !investor.secteur || !investor.province) {
             return res.status(400).json({
               error: 'INVESTOR_FIELDS_REQUIRED',
-              message: 'Prénom, nom, e-mail et pays sont obligatoires.',
+              message: 'Prénom, nom, e-mail, secteur et province sont obligatoires.',
             });
           }
 
@@ -160,6 +165,27 @@ export default {
               message: "L'adresse e-mail n'est pas valide.",
             });
           }
+
+          if (!OFFICIAL_PROVINCES.has(investor.province)) {
+            return res.status(400).json({
+              error: 'INVALID_PROVINCE',
+              message: 'La province sélectionnée n’est pas valide.',
+            });
+          }
+        }
+
+        if (!investor.secteur || !investor.province) {
+          return res.status(400).json({
+            error: 'INVESTOR_PROFILE_INCOMPLETE',
+            message: 'Complétez le secteur et la province de votre profil avant cette demande.',
+          });
+        }
+
+        if (!OFFICIAL_PROVINCES.has(investor.province)) {
+          return res.status(400).json({
+            error: 'INVALID_PROVINCE',
+            message: 'La province sélectionnée n’est pas valide.',
+          });
         }
 
         const project = await database('PROJETS')
@@ -212,8 +238,8 @@ export default {
                   nom: investor.nom,
                   telephone: investor.telephone,
                   entreprise: investor.entreprise,
-                  fonction: investor.fonction,
-                  pays: investor.pays,
+                  secteur: investor.secteur,
+                  province: investor.province,
                 });
             } else {
               const insertedInvestors = await trx('investisseurs')

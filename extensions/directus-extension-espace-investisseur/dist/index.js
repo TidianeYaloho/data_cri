@@ -11,6 +11,7 @@ const MAX_TEXT_LENGTH = 255;
 const MIN_PASSWORD_LENGTH = 10;
 const GENERIC_PASSWORD_RESET_MESSAGE =
   "Si un compte actif correspond à cette adresse, un e-mail de réinitialisation a été envoyé.";
+const OFFICIAL_PROVINCES = new Set(['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan']);
 
 function hashToken(value) {
   return createHash('sha256').update(String(value || '')).digest('hex');
@@ -147,15 +148,17 @@ function normalizeRegistration(body) {
     telephone: normalizeText(body?.telephone) || null,
     entreprise: normalizeText(body?.entreprise) || null,
     fonction: normalizeText(body?.fonction) || null,
-    pays: normalizeText(body?.pays),
+    pays: normalizeText(body?.pays) || null,
+    secteur: normalizeText(body?.secteur),
+    province: normalizeText(body?.province),
   };
 }
 
 function validateProfile(profile) {
-  if (!profile.prenom || !profile.nom || !profile.email || !profile.pays) {
+  if (!profile.prenom || !profile.nom || !profile.email || !profile.secteur || !profile.province) {
     return {
       error: 'FIELDS_REQUIRED',
-      message: 'Prénom, nom, e-mail et pays sont obligatoires.',
+      message: 'Prénom, nom, e-mail, secteur et province sont obligatoires.',
     };
   }
 
@@ -164,6 +167,10 @@ function validateProfile(profile) {
       error: 'INVALID_EMAIL',
       message: "L'adresse e-mail n'est pas valide.",
     };
+  }
+
+  if (!OFFICIAL_PROVINCES.has(profile.province)) {
+    return { error: 'INVALID_PROVINCE', message: 'La province sélectionnée n’est pas valide.' };
   }
 
   for (const [field, value] of Object.entries(profile)) {
@@ -220,6 +227,8 @@ async function loadInvestorByUser(database, userId) {
       'entreprise',
       'fonction',
       'pays',
+      'secteur',
+      'province',
       'date_created',
       'directus_user',
       'email_verifie_at',
@@ -356,8 +365,8 @@ export default {
               email: profile.email,
               telephone: profile.telephone,
               entreprise: profile.entreprise,
-              fonction: profile.fonction,
-              pays: profile.pays,
+              secteur: profile.secteur,
+              province: profile.province,
               directus_user: createdUserId,
               email_verification_token_hash: verification.tokenHash,
               email_verification_expires_at: verification.expiresAt,
@@ -373,6 +382,8 @@ export default {
               entreprise: profile.entreprise,
               fonction: profile.fonction,
               pays: profile.pays,
+              secteur: profile.secteur,
+              province: profile.province,
               directus_user: createdUserId,
               date_created: now,
               email_verification_token_hash: verification.tokenHash,
@@ -703,6 +714,8 @@ export default {
               entreprise: investor.entreprise,
               fonction: investor.fonction,
               pays: investor.pays,
+              secteur: investor.secteur,
+              province: investor.province,
               email_verifie_at: investor.email_verifie_at,
             },
             demandes,
@@ -742,14 +755,21 @@ export default {
           nom: normalizeText(req.body?.nom),
           telephone: normalizeText(req.body?.telephone) || null,
           entreprise: normalizeText(req.body?.entreprise) || null,
-          fonction: normalizeText(req.body?.fonction) || null,
-          pays: normalizeText(req.body?.pays),
+          secteur: normalizeText(req.body?.secteur),
+          province: normalizeText(req.body?.province),
         };
 
-        if (!updates.prenom || !updates.nom || !updates.pays) {
+        if (!updates.prenom || !updates.nom || !updates.secteur || !updates.province) {
           return res.status(400).json({
             error: 'FIELDS_REQUIRED',
-            message: 'Prénom, nom et pays sont obligatoires.',
+            message: 'Prénom, nom, secteur et province sont obligatoires.',
+          });
+        }
+
+        if (!OFFICIAL_PROVINCES.has(updates.province)) {
+          return res.status(400).json({
+            error: 'INVALID_PROVINCE',
+            message: 'La province sélectionnée n’est pas valide.',
           });
         }
 
