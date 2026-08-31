@@ -15,19 +15,32 @@ async function api(path, options = {}) {
 }
 
 async function upsertField(collection, field, definition) {
-  let exists = true;
-  try { await api(`/fields/${collection}/${field}`); } catch (error) {
-    if (!String(error.message).includes(': 404 ')) throw error;
-    exists = false;
+  const fields = await api(`/fields/${collection}`);
+  const exists = Array.isArray(fields) && fields.some((item) => item.field === field);
+
+  const path = exists
+    ? `/fields/${collection}/${field}`
+    : `/fields/${collection}`;
+
+  const body = exists
+    ? definition
+    : { field, ...definition };
+
+  if (apply) {
+    await api(path, {
+      method: exists ? 'PATCH' : 'POST',
+      body: JSON.stringify(body),
+    });
   }
 
-  const path = exists ? `/fields/${collection}/${field}` : `/fields/${collection}`;
-  const body = exists ? definition : { field, ...definition };
-  if (apply) await api(path, { method: exists ? 'PATCH' : 'POST', body: JSON.stringify(body) });
-  console.log(`${apply ? (exists ? 'Mis à jour' : 'Créé') : (exists ? 'À mettre à jour' : 'À créer')} : ${collection}.${field}`);
+  console.log(
+    `${apply
+      ? (exists ? 'Mis à jour' : 'Créé')
+      : (exists ? 'À mettre à jour' : 'À créer')} : ${collection}.${field}`
+  );
+
   return exists;
 }
-
 const provinces = ['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((value) => ({ text: value, value }));
 function normalizeProvince(value) {
   const key = String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
