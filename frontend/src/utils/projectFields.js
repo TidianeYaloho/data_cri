@@ -22,11 +22,8 @@ export function normalizeProvince(value) {
 }
 
 export function projectProvinces(project) {
-  if (Array.isArray(project?.provinces) && project.provinces.length) {
-    return [...new Set(project.provinces.map(normalizeProvince).filter(Boolean))];
-  }
-  const legacyProvince = normalizeProvince(project?.province);
-  return legacyProvince ? [legacyProvince] : [];
+  if (!Array.isArray(project?.provinces)) return [];
+  return [...new Set(project.provinces.map(normalizeProvince).filter(Boolean))];
 }
 
 export function projectProvinceLabel(project, fallback = 'À préciser') {

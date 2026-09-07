@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { InvalidPayloadError } from '@directus/errors';
 
 function asArray(value) {
   if (Array.isArray(value)) return value;
@@ -74,6 +75,12 @@ export default ({ filter, action }, { services, env, logger }) => {
   filter(
     'demandes_business_plan.items.update',
     async (payload, meta, context) => {
+      if (payload?.statut === 'telechargee') {
+        throw new InvalidPayloadError({
+          reason: 'Le statut "Téléchargée" est attribué automatiquement après un téléchargement réel du Business Plan.'
+        });
+      }
+
       if (payload?.statut !== 'validee') return payload;
 
       const keys = asArray(meta?.keys);
@@ -277,12 +284,7 @@ export default ({ filter, action }, { services, env, logger }) => {
             continue;
           }
 
-          if (payload.statut === 'telechargee') {
-            await context.database('demandes_business_plan')
-              .where('id', requestId)
-              .whereNull('date_telechargement')
-              .update({ date_telechargement: new Date() });
-          }
+
         } catch (error) {
           logger.error(
             error,

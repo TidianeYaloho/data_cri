@@ -10,7 +10,7 @@ const COLUMN_MAPPING = {
   'Montant de l’investissement': 'investissement_mad', "Montant de l'investissement": 'investissement_mad',
   'Nombre d’emplois': 'nombre_postes', "Nombre d'emplois": 'nombre_postes',
 };
-const IGNORED = new Set(['EXCEL', 'PPT', 'Revue', 'VF / Remarques à impacter', 'Commentaire', 'Catégorie']);
+const IGNORED = new Set(['EXCEL', 'PPT', 'Revue', 'VF / Remarques à impacter', 'Commentaire']);
 
 function clean(value) { return typeof value === 'string' ? value.trim() : value; }
 export function normalizeProvince(value) {
@@ -42,7 +42,7 @@ export function mapRow(row) {
     }
   }
   project.provinces = provincesFromRow(row);
-  const officialType = String(row.Type || '').trim().toLowerCase();
+  const officialType = String(row.Type || row['Catégorie'] || '').trim().toLowerCase();
   project.type_projet = ({ 'grand projet': 'grand_projet', tpme: 'tpme', 'porteur de projet': 'porteur_projet' })[officialType] || null;
   const missing = ['titre', 'secteur', 'type_projet', 'provinces', 'investissement_mad', 'nombre_postes'].filter((field) => field === 'provinces' ? !project.provinces.length : project[field] === null || project[field] === undefined || project[field] === '');
   return { project, missing, complete: missing.length === 0 };
@@ -66,15 +66,22 @@ async function main() {
   const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: null });
   const report = { total: rows.length, imported: 0, ignored: 0, duplicates: 0, errors: [], complete: 0, incomplete: 0, missingFields: {} };
   const knownCodes = new Set();
-  if (apply) {
+  const fileCodes = new Set();
+  if (process.env.DIRECTUS_ADMIN_TOKEN) {
     const existing = await directus('/items/PROJETS?fields=code_projet&limit=-1', process.env.DIRECTUS_ADMIN_TOKEN);
-    existing.forEach((item) => item.code_projet && knownCodes.add(String(item.code_projet)));
+    existing.forEach((item) => item.code_projet && knownCodes.add(String(item.code_projet).trim()));
+  } else if (!apply) {
+    report.errors.push({ line: null, error: 'Dry-run sans DIRECTUS_ADMIN_TOKEN : les doublons déjà présents dans Directus ne peuvent pas être vérifiés.' });
   }
 
   for (const [index, row] of rows.entries()) {
     const { project, missing, complete } = mapRow(row);
     if (!project.titre) { report.ignored += 1; report.errors.push({ line: index + 2, error: 'Titre absent' }); continue; }
-    if (project.code_projet && knownCodes.has(String(project.code_projet))) { report.duplicates += 1; continue; }
+    if (project.code_projet) {
+      const code = String(project.code_projet).trim();
+      if (knownCodes.has(code) || fileCodes.has(code)) { report.duplicates += 1; continue; }
+      fileCodes.add(code);
+    }
     complete ? report.complete += 1 : report.incomplete += 1;
     missing.forEach((field) => { report.missingFields[field] = (report.missingFields[field] || 0) + 1; });
     if (apply) {

@@ -12,6 +12,7 @@ const MIN_PASSWORD_LENGTH = 10;
 const GENERIC_PASSWORD_RESET_MESSAGE =
   "Si un compte actif correspond à cette adresse, un e-mail de réinitialisation a été envoyé.";
 const OFFICIAL_PROVINCES = new Set(['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan']);
+const OFFICIAL_SECTORS = new Set(['agriculture', 'énergie', 'industrie', 'environnement', 'tourisme', 'service']);
 
 function hashToken(value) {
   return createHash('sha256').update(String(value || '')).digest('hex');
@@ -167,6 +168,10 @@ function validateProfile(profile) {
       error: 'INVALID_EMAIL',
       message: "L'adresse e-mail n'est pas valide.",
     };
+  }
+
+  if (!OFFICIAL_SECTORS.has(profile.secteur)) {
+    return { error: 'INVALID_SECTOR', message: 'Le secteur sélectionné n’est pas valide.' };
   }
 
   if (!OFFICIAL_PROVINCES.has(profile.province)) {
@@ -763,6 +768,13 @@ export default {
           return res.status(400).json({
             error: 'FIELDS_REQUIRED',
             message: 'Prénom, nom, secteur et province sont obligatoires.',
+          });
+        }
+
+        if (!OFFICIAL_SECTORS.has(updates.secteur)) {
+          return res.status(400).json({
+            error: 'INVALID_SECTOR',
+            message: 'Le secteur sélectionné n’est pas valide.',
           });
         }
 

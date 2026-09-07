@@ -12,6 +12,16 @@ import {
   verifyInvestorEmail,
 } from '../api/directus.js';
 
+
+const INVESTOR_SECTORS = [
+  { value: 'agriculture', label: 'Agriculture' },
+  { value: 'énergie', label: 'Énergie' },
+  { value: 'industrie', label: 'Industrie' },
+  { value: 'environnement', label: 'Environnement' },
+  { value: 'tourisme', label: 'Tourisme' },
+  { value: 'service', label: 'Service' },
+];
+
 const initialRegisterForm = {
   prenom: '',
   nom: '',
@@ -525,7 +535,10 @@ export default function InvestorAccountModal({
                   </label>
                   <label>
                     Secteur
-                    <input required name="secteur" value={profileForm.secteur} onChange={updateProfile} />
+                    <select required name="secteur" value={profileForm.secteur} onChange={updateProfile}>
+                      <option value="">Sélectionner un secteur</option>
+                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    </select>
                   </label>
                   <label>
                     Province
@@ -695,7 +708,10 @@ export default function InvestorAccountModal({
                   </label>
                   <label>
                     Secteur
-                    <input required name="secteur" value={registerForm.secteur} onChange={updateRegister} />
+                    <select required name="secteur" value={registerForm.secteur} onChange={updateRegister}>
+                      <option value="">Sélectionner un secteur</option>
+                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    </select>
                   </label>
                   <label>
                     Province

@@ -20,7 +20,6 @@ export default {
             'secteur',
             'filiere',
             'description',
-            'province',
             'provinces',
             'type_projet',
             'investissement_mad',

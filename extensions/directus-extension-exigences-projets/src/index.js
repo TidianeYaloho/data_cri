@@ -1,3 +1,5 @@
+﻿import { InvalidPayloadError } from '@directus/errors';
+
 const PUBLISHED = 'publie';
 const ALLOWED_TYPES = new Set(['grand_projet', 'tpme', 'porteur_projet']);
 const ALLOWED_MIME_TYPES = new Set(['application/pdf', 'text/html']);
@@ -17,8 +19,6 @@ function asArray(value) {
 
 function missingRequiredFields(project) {
   const provinces = asArray(project.provinces);
-  if (!provinces.length && project.province) provinces.push(project.province);
-
   return [
     !project.titre && 'titre',
     !ALLOWED_TYPES.has(project.type_projet) && 'type_projet',
@@ -29,12 +29,11 @@ function missingRequiredFields(project) {
   ].filter(Boolean);
 }
 
-export default ({ filter }, { database, exceptions }) => {
-  const { InvalidPayloadError } = exceptions;
+export default ({ filter }, { database }) => {
 
   async function validatePublication(payload, meta) {
-    // La contrainte s'applique au passage explicite à « publié ».
-    // Les imports et les fiches historiques déjà publiées restent modifiables.
+    // La contrainte s'applique au passage explicite Ã  Â« publiÃ© Â».
+    // Les imports et les fiches historiques dÃ©jÃ  publiÃ©es restent modifiables.
     if (payload?.status_publication !== PUBLISHED) return payload;
 
     const keys = Array.isArray(meta?.keys) ? meta.keys : [];
@@ -46,7 +45,7 @@ export default ({ filter }, { database, exceptions }) => {
     const missing = missingRequiredFields(project);
     if (missing.length) {
       throw new InvalidPayloadError({
-        reason: `Publication impossible. Champs métier manquants : ${missing.join(', ')}.`,
+        reason: `Publication impossible. Champs mÃ©tier manquants : ${missing.join(', ')}.`,
       });
     }
 
@@ -57,7 +56,7 @@ export default ({ filter }, { database, exceptions }) => {
         .first();
       if (!file || !ALLOWED_MIME_TYPES.has(file.type)) {
         throw new InvalidPayloadError({
-          reason: 'Le Business Plan doit être au format PDF ou HTML.',
+          reason: 'Le Business Plan doit Ãªtre au format PDF ou HTML.',
         });
       }
     }
