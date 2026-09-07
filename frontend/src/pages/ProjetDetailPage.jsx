@@ -181,7 +181,7 @@ export default function ProjetDetailPage({
 
             <div className={`detail-visual sector-${project.secteur || 'service'}`}>
               {imageUrl ? (
-                <img src={imageUrl} alt="" />
+                <img src={imageUrl} alt={project.titre || 'Visuel du projet'} />
               ) : (
                 <div className="detail-placeholder">
                   <SectorIcon sector={project.secteur} size={82} />

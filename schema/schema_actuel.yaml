@@ -99,7 +99,8 @@ collections:
       group: null
       hidden: false
       icon: null
-      item_duplication_fields: null
+      item_duplication_fields:
+        - email_signature
       note: null
       preview_url: null
       singleton: true
@@ -2085,12 +2086,12 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 1
+      sort: 90
       special: null
       translations: null
       validation: null
       validation_message: null
-      width: full
+      width: half
     schema:
       name: id
       table: parametres_plateforme
@@ -2126,7 +2127,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 2
+      sort: 93
       special:
         - user-created
       translations: null
@@ -2168,7 +2169,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 3
+      sort: 91
       special:
         - date-created
       translations: null
@@ -2210,7 +2211,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 4
+      sort: 94
       special:
         - user-updated
       translations: null
@@ -2252,7 +2253,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 5
+      sort: 92
       special:
         - date-updated
       translations: null
@@ -2288,16 +2289,22 @@ fields:
       group: null
       hidden: false
       interface: boolean
-      note: null
+      note: >-
+        Active ou désactive la gestion des comptes investisseurs et
+        l'authentification dédiée.
       options:
-        label: Comptes investisseurs activés
+        label: Activer l'espace et les comptes investisseurs
       readonly: false
       required: true
       searchable: true
-      sort: 6
+      sort: 21
       special:
         - cast-boolean
-      translations: null
+      translations:
+        - language: fr-FR
+          translation: Comptes investisseurs
+        - language: en-US
+          translation: Comptes investisseurs
       validation: null
       validation_message: null
       width: full
@@ -2330,7 +2337,9 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: >-
+        Définit si le Business Plan nécessite une validation manuelle, un accès
+        direct ou s'il est désactivé.
       options:
         choices:
           - text: Désactivé
@@ -2342,12 +2351,16 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 7
+      sort: 31
       special: null
-      translations: null
+      translations:
+        - language: fr-FR
+          translation: Mode d'accès au Business Plan
+        - language: en-US
+          translation: Mode d'accès au Business Plan
       validation: null
       validation_message: null
-      width: full
+      width: half
     schema:
       name: mode_acces_business_plan
       table: parametres_plateforme
@@ -2365,6 +2378,683 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_nom_contact
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_nom_contact
+      group: null
+      hidden: false
+      interface: input
+      note: Nom affiché de l'expéditeur ou du contact CRI (ex. Contact CRI).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Nom du contact
+        - language: en-US
+          translation: Nom du contact
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_nom_contact
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: Contact CRI
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_adresse_contact
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_adresse_contact
+      group: null
+      hidden: false
+      interface: input
+      note: Adresse e-mail affichée pour contacter le CRI (ex. contact@cri.local).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Adresse e-mail de contact
+        - language: en-US
+          translation: Adresse e-mail de contact
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_adresse_contact
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: contact@cri.local
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: duree_validite_lien_heures
+    type: integer
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: duree_validite_lien_heures
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Durée de validité des liens de téléchargement sécurisés en heures (ex.
+        168 pour 7 jours).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 32
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Durée de validité du lien (heures)
+        - language: en-US
+          translation: Durée de validité du lien (heures)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: duree_validite_lien_heures
+      table: parametres_plateforme
+      data_type: integer
+      default_value: 168
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_signature
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_signature
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Signature insérée en bas des e-mails. Variables : {{nom_contact}},
+        {{email_contact}}
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Signature des e-mails
+        - language: en-US
+          translation: Signature des e-mails
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_signature
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_creation_compte_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_creation_compte_objet
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Objet de l'e-mail de vérification et d'activation envoyé à
+        l'investisseur.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 41
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – création du compte
+        - language: en-US
+          translation: Objet – création du compte
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_creation_compte_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_creation_compte_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_creation_compte_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{email}}, {{lien_telechargement}},
+        {{duree_validite_heures}}, {{nom_contact}}, {{email_contact}}. La
+        signature configurée dans les paramètres généraux est ajoutée
+        automatiquement à la fin de l'e-mail. La variable {{signature}} reste
+        disponible si vous souhaitez positionner manuellement la signature à un
+        endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 42
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – création du compte
+        - language: en-US
+          translation: Message – création du compte
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_creation_compte_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_validation_bp_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_validation_bp_objet
+      group: null
+      hidden: false
+      interface: input
+      note: Objet de l'e-mail notifiant la validation de l'accès au Business Plan.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 51
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – demande validée
+        - language: en-US
+          translation: Objet – demande validée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_validation_bp_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_validation_bp_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_validation_bp_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{nom_complet}}, {{projet_titre}},
+        {{code_projet}}, {{lien_telechargement}}, {{duree_validite_heures}},
+        {{nom_contact}}, {{email_contact}}. La signature configurée dans les
+        paramètres généraux est ajoutée automatiquement à la fin de l'e-mail. La
+        variable {{signature}} reste disponible si vous souhaitez positionner
+        manuellement la signature à un endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 52
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – demande validée
+        - language: en-US
+          translation: Message – demande validée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_validation_bp_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_refus_bp_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_refus_bp_objet
+      group: null
+      hidden: false
+      interface: input
+      note: Objet de l'e-mail notifiant le refus d'accès au Business Plan.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 61
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – demande refusée
+        - language: en-US
+          translation: Objet – demande refusée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_refus_bp_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_refus_bp_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_refus_bp_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{nom_complet}}, {{projet_titre}},
+        {{code_projet}}, {{nom_contact}}, {{email_contact}}. La signature
+        configurée dans les paramètres généraux est ajoutée automatiquement à la
+        fin de l'e-mail. La variable {{signature}} reste disponible si vous
+        souhaitez positionner manuellement la signature à un endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 62
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – demande refusée
+        - language: en-US
+          translation: Message – demande refusée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_refus_bp_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: duree_validite_verification_compte_heures
+    type: integer
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: duree_validite_verification_compte_heures
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Durée pendant laquelle le lien envoyé lors de la création d’un compte
+        investisseur reste valide.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 22
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Durée de validité du lien de vérification du compte (heures)
+        - language: en-US
+          translation: Durée de validité du lien de vérification du compte (heures)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: duree_validite_verification_compte_heures
+      table: parametres_plateforme
+      data_type: integer
+      default_value: 24
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: section_general
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_general
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: settings
+        title: Paramètres généraux
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_comptes
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_comptes
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: group
+        title: Compte investisseur
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_acces_bp
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_acces_bp
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: description
+        title: Accès Business Plan
+      readonly: false
+      required: false
+      searchable: true
+      sort: 30
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_creation
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_creation
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: mark_email_read
+        title: E-mails – création de compte
+      readonly: false
+      required: false
+      searchable: true
+      sort: 40
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_validation
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_validation
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: check_circle
+        title: E-mails – validation
+      readonly: false
+      required: false
+      searchable: true
+      sort: 50
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_refus
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_refus
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: cancel
+        title: E-mails – refus
+      readonly: false
+      required: false
+      searchable: true
+      sort: 60
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
 systemFields:
   - collection: directus_activity
     field: timestamp

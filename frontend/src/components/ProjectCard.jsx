@@ -26,7 +26,7 @@ export default function ProjectCard({ project, onOpen }) {
     <article className="project-card">
       <div className={`project-visual sector-${project.secteur || 'service'}`}>
         {imageUrl ? (
-          <img src={imageUrl} alt="" loading="lazy" />
+          <img src={imageUrl} alt={project.titre || 'Visuel du projet'} loading="lazy" />
         ) : (
           <div className="project-visual-placeholder">
             <SectorIcon sector={project.secteur} size={52} />

@@ -436,11 +436,14 @@ export default function InvestorAccountModal({
         >
           ×
         </button>
+        <div className="modal-body">
 
         {showAccount ? (
+
           <>
             <p className="eyebrow">Espace investisseur</p>
             <h2 id="investor-account-title">Bonjour {account.profil.prenom}</h2>
+            <p className="modal-subtitle">Accédez à votre espace investisseur</p>
             <p className="modal-intro">
               Suivez vos demandes de Business Plan et gérez vos informations.
             </p>
@@ -809,13 +812,12 @@ export default function InvestorAccountModal({
                 </button>
               </form>
             )}
-
-            {message && (
-              <div className={`form-message form-message-${status}`}>{message}</div>
-            )}
           </>
         )}
+
+
       </div>
+        </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { renderTemplate, renderEmailBody } from '../../shared/template.js';
 
 const normalizeText = (value) =>
   typeof value === 'string' ? value.trim() : '';
@@ -18,17 +19,36 @@ function hashToken(value) {
   return createHash('sha256').update(String(value || '')).digest('hex');
 }
 
-function getVerificationTtlHours(env) {
-  const parsed = Number(env.INVESTOR_EMAIL_VERIFICATION_TTL_HOURS ?? 24);
+function getVerificationTtlHours(env, settings) {
+  let parsed = null;
 
-  if (!Number.isFinite(parsed) || parsed <= 0) return 24;
-  return Math.min(parsed, 24 * 7);
+  if (
+    settings &&
+    settings.duree_validite_verification_compte_heures !== null &&
+    settings.duree_validite_verification_compte_heures !== undefined
+  ) {
+    const fromSettings = Number(settings.duree_validite_verification_compte_heures);
+    if (Number.isFinite(fromSettings) && fromSettings > 0) {
+      parsed = fromSettings;
+    }
+  }
+
+  if (parsed === null) {
+    const fromEnv = Number(env?.INVESTOR_EMAIL_VERIFICATION_TTL_HOURS ?? 24);
+    if (Number.isFinite(fromEnv) && fromEnv > 0) {
+      parsed = fromEnv;
+    } else {
+      parsed = 24;
+    }
+  }
+
+  return Math.max(1, Math.min(parsed, 168));
 }
 
-function createVerificationToken(env) {
+function createVerificationToken(env, settings) {
   const rawToken = randomBytes(32).toString('hex');
   const tokenHash = hashToken(rawToken);
-  const ttlHours = getVerificationTtlHours(env);
+  const ttlHours = getVerificationTtlHours(env, settings);
   const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 
   return { rawToken, tokenHash, expiresAt, ttlHours };
@@ -64,29 +84,62 @@ async function sendVerificationEmail({
   profile,
   rawToken,
   ttlHours,
+  settings,
 }) {
   const mailService = new MailService({
     schema,
     knex: database,
   });
 
+  const emailContact = settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local';
+  const verificationUrl = buildVerificationUrl(env, rawToken);
+
+  // Variables de remplacement (sans 'signature' : renderEmailBody l'injecte)
+  const variables = {
+    prenom: profile.prenom || '',
+    nom: profile.nom || '',
+    nom_complet: fullName(profile),
+    email: profile.email || '',
+    lien_telechargement: verificationUrl,
+    duree_validite_heures: String(ttlHours),
+    nom_contact: settings?.email_nom_contact || 'Contact CRI',
+    email_contact: emailContact,
+    email_contact_cri: emailContact,
+  };
+
+  const signature = settings?.email_signature || '';
+
+  const defaultSubject = 'Vérifiez votre adresse e-mail - Espace investisseur CRI';
+  // Corps par défaut : pas de {{signature}}, renderEmailBody l'ajoutera automatiquement (Cas A)
+  const defaultBodyTemplate = [
+    `Bonjour {{nom_complet}},`,
+    '',
+    "Votre compte investisseur a été créé sur la Banque régionale de projets du CRI.",
+    '',
+    "Pour activer votre compte, cliquez sur le lien suivant :",
+    '{{lien_telechargement}}',
+    '',
+    `Ce lien est valable pendant {{duree_validite_heures}} heure(s).`,
+    "Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message.",
+  ].join('\n');
+
+  let subject = defaultSubject;
+  if (settings?.email_creation_compte_objet?.trim()) {
+    subject = renderTemplate(settings.email_creation_compte_objet, variables);
+  }
+
+  let text;
+  if (settings?.email_creation_compte_message?.trim()) {
+    text = renderEmailBody(settings.email_creation_compte_message, variables, signature);
+  } else {
+    text = renderEmailBody(defaultBodyTemplate, variables, signature);
+  }
+
   await mailService.send({
     to: profile.email,
     from: env.EMAIL_FROM || 'no-reply@cri.local',
-    subject: 'Vérifiez votre adresse e-mail - Espace investisseur CRI',
-    text: [
-      `Bonjour ${fullName(profile) || 'Investisseur'},`,
-      '',
-      "Votre compte investisseur a été créé sur la Banque régionale de projets du CRI.",
-      '',
-      "Pour activer votre compte, cliquez sur le lien suivant :",
-      buildVerificationUrl(env, rawToken),
-      '',
-      `Ce lien est valable pendant ${ttlHours} heure(s).`,
-      "Si vous n'êtes pas à l'origine de cette inscription, ignorez simplement ce message.",
-      '',
-      `Contact CRI : ${env.CRI_CONTACT_EMAIL || 'contact@cri.local'}`,
-    ].join('\n'),
+    subject,
+    text,
   });
 }
 
@@ -119,13 +172,27 @@ function buildAccessUrl(env, rawToken) {
 
 async function readSettings(database) {
   const settings = await database('parametres_plateforme')
-    .select(['comptes_investisseurs', 'mode_acces_business_plan'])
+    .select([
+      'comptes_investisseurs',
+      'mode_acces_business_plan',
+      'email_nom_contact',
+      'email_adresse_contact',
+      'email_signature',
+      'email_creation_compte_objet',
+      'email_creation_compte_message',
+      'duree_validite_verification_compte_heures'
+    ])
     .first();
 
   return {
     comptes_investisseurs: settings?.comptes_investisseurs === true,
-    mode_acces_business_plan:
-      settings?.mode_acces_business_plan ?? 'validation',
+    mode_acces_business_plan: settings?.mode_acces_business_plan ?? 'validation',
+    email_nom_contact: settings?.email_nom_contact,
+    email_adresse_contact: settings?.email_adresse_contact,
+    email_signature: settings?.email_signature,
+    email_creation_compte_objet: settings?.email_creation_compte_objet,
+    email_creation_compte_message: settings?.email_creation_compte_message,
+    duree_validite_verification_compte_heures: settings?.duree_validite_verification_compte_heures,
   };
 }
 
@@ -355,7 +422,7 @@ export default {
           throw new Error("Directus n'a pas retourné l'identifiant du compte créé.");
         }
 
-        const verification = createVerificationToken(env);
+        const verification = createVerificationToken(env, settings);
         const now = new Date();
         let investorId;
 
@@ -411,6 +478,7 @@ export default {
             profile,
             rawToken: verification.rawToken,
             ttlHours: verification.ttlHours,
+            settings,
           });
         } catch (emailError) {
           emailEnvoye = false;
@@ -475,7 +543,7 @@ export default {
 
           if (user?.status === 'unverified') {
             const schema = await getSchema();
-            const verification = createVerificationToken(env);
+            const verification = createVerificationToken(env, settings);
 
             await database('investisseurs')
               .where('id', investor.id)
@@ -494,6 +562,7 @@ export default {
                 profile: investor,
                 rawToken: verification.rawToken,
                 ttlHours: verification.ttlHours,
+                settings,
               });
             } catch (emailError) {
               logger.error(

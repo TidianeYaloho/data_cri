@@ -29,20 +29,31 @@ function isImmediateMode(mode) {
   return mode === 'direct';
 }
 
-function getLinkTtlHours(env) {
-  const parsed = Number(env.BUSINESS_PLAN_LINK_TTL_HOURS ?? 168);
+function getLinkTtlHours(env, settings) {
+  let parsed = null;
+  if (settings && settings.duree_validite_lien_heures !== null && settings.duree_validite_lien_heures !== undefined) {
+    const fromSettings = Number(settings.duree_validite_lien_heures);
+    if (Number.isFinite(fromSettings) && fromSettings > 0) {
+      parsed = fromSettings;
+    }
+  }
 
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return 168;
+  if (parsed === null) {
+    const fromEnv = Number(env.BUSINESS_PLAN_LINK_TTL_HOURS ?? 168);
+    if (Number.isFinite(fromEnv) && fromEnv > 0) {
+      parsed = fromEnv;
+    } else {
+      parsed = 168;
+    }
   }
 
   return Math.min(parsed, 24 * 30);
 }
 
-function createAccessToken(env) {
+function createAccessToken(env, settings) {
   const rawToken = randomBytes(32).toString('hex');
   const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-  const ttlHours = getLinkTtlHours(env);
+  const ttlHours = getLinkTtlHours(env, settings);
   const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 
   return {
@@ -76,7 +87,7 @@ export default {
         }
 
         const settings = await database('parametres_plateforme')
-          .select(['mode_acces_business_plan', 'comptes_investisseurs'])
+          .select(['mode_acces_business_plan', 'comptes_investisseurs', 'duree_validite_lien_heures'])
           .first();
 
         const mode = settings?.mode_acces_business_plan ?? 'validation';
@@ -268,7 +279,7 @@ export default {
            * peut être réutilisée : on génère simplement un nouveau lien sûr.
            */
           if (existingRequest && isImmediateMode(mode)) {
-            const access = createAccessToken(env);
+            const access = createAccessToken(env, settings);
 
             await trx('demandes_business_plan')
               .where('id', existingRequest.id)
@@ -317,7 +328,7 @@ export default {
            */
 
           if (isImmediateMode(mode)) {
-            const access = createAccessToken(env);
+            const access = createAccessToken(env, settings);
 
             const insertedRequests = await trx('demandes_business_plan')
               .insert({

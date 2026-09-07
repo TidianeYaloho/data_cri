@@ -45,6 +45,12 @@ function groupRows(rows, keyFn) {
   }
   return groups;
 }
+function getMonthKey(dateVal) {
+  if (!dateVal) return null;
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return null;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+}
 function statsForGroups(groups) {
   return [...groups.entries()].map(([name, rows]) => ({
     name, demandes: rows.length,
@@ -83,75 +89,122 @@ const ADMIN_HTML = String.raw`<!doctype html>
 <title>Outils CRI</title>
 <style>
 *{box-sizing:border-box}
-body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#f5f7fa;color:#17212b}
-.wrap{max-width:1200px;margin:auto;padding:24px}
-.card{background:#fff;border:1px solid #dce3ea;border-radius:10px;padding:18px;margin:14px 0}
-h1,h2{color:#173f63;margin-top:0}
-.tabs{display:flex;gap:8px;margin:16px 0;padding:4px;background:#eef4f8;border-radius:10px;width:fit-content}
-.tab-btn{padding:10px 20px;border:none;border-radius:7px;background:transparent;cursor:pointer;font-size:14px;font-weight:500;color:#456;transition:all .2s}
-.tab-btn.active{background:#fff;color:#173f63;box-shadow:0 1px 4px rgba(0,0,0,.12)}
-.tab-btn:hover{background:#fff;color:#173f63}
-.btn{padding:9px 18px;margin:4px;border:1px solid #bcd;border-radius:7px;background:#fff;cursor:pointer;font-size:13px;transition:background .15s}
-.btn:hover{background:#eef4f8}
-.btn.primary{background:#173f63;color:#fff;border-color:#173f63}
-.btn.primary:hover{background:#1a5080}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0}
-.kpi{padding:16px;background:#eef4f8;border-radius:8px;text-align:center}
-.kpi b{font-size:30px;display:block;color:#173f63}
-.kpi span{font-size:12px;color:#678;text-transform:uppercase;letter-spacing:.05em}
-label{display:block;margin:8px 0;font-size:13px;font-weight:500}
-input,select{padding:8px 10px;min-width:160px;max-width:100%;border:1px solid #cdd;border-radius:6px;font-size:13px}
-input:focus,select:focus{outline:2px solid #3a8fc7;border-color:#3a8fc7}
-table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{border:1px solid #d8e0e7;padding:8px 10px;text-align:left}
-th{background:#eef4f8;font-weight:600;color:#173f63}
-tr:hover{background:#f8fafb}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;background:#f8fafc;color:#0f172a;line-height:1.5}
+.wrap{max-width:1200px;margin:auto;padding:20px 24px}
+.header-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+h1{color:#0f2744;margin:0;font-size:22px;font-weight:700;letter-spacing:-0.01em}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.card-header{margin-bottom:14px}
+.card-header h2{margin:0;font-size:16px;font-weight:700;color:#0f2744}
+.tabs{display:flex;gap:6px;margin:16px 0;padding:4px;background:#e2e8f0;border-radius:8px;width:fit-content}
+.tab-btn{padding:8px 18px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:13px;font-weight:600;color:#475569;transition:all .15s}
+.tab-btn.active{background:#fff;color:#0f2744;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tab-btn:hover:not(.active){color:#0f2744;background:rgba(255,255,255,.5)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;color:#334155;cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.btn:hover{background:#f1f5f9;border-color:#94a3b8}
+.btn.primary{background:#0f2744;color:#fff;border-color:#0f2744}
+.btn.primary:hover{background:#1e3a5f;border-color:#1e3a5f}
+
+/* Filtres */
+.filters-card{padding:18px 20px}
+.filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:flex-end}
+.filter-item{display:flex;flex-direction:column;gap:6px}
+.filter-item label{margin:0;font-size:12px;font-weight:600;color:#334155}
+.filter-item input,.filter-item select{width:100%;height:36px;padding:6px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;background:#fff;color:#0f172a;min-width:0}
+.filter-item input:focus,.filter-item select:focus{outline:2px solid #0284c7;border-color:#0284c7}
+.filter-btn-item{display:flex;align-items:flex-end}
+.btn-filter{width:100%;height:36px;margin:0;font-weight:600}
+
+/* KPIs */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:16px 0}
+.kpi{padding:16px;background:#fff;border:1px solid #e2e8f0;border-top:3px solid #0f2744;border-radius:8px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.03);transition:transform .15s ease,box-shadow .15s ease}
+.kpi:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.06)}
+.kpi b{font-size:28px;line-height:1.2;display:block;color:#0f2744;font-weight:700}
+.kpi span{font-size:12px;color:#475569;font-weight:600;display:block;margin-top:6px;letter-spacing:.02em}
+
+/* Tableaux */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:540px}
+th,td{padding:10px 12px;border-bottom:1px solid #e2e8f0;text-align:left}
+th{background:#f8fafc;font-weight:600;color:#0f2744;white-space:nowrap;border-top:none}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fafc}
+.table-note{font-size:12px;color:#64748b;margin-bottom:10px;font-style:italic}
+.empty-state{color:#64748b;font-size:13px;margin:10px 0;font-style:italic}
+
+/* Alertes et états */
 .hidden{display:none !important}
-.warn{background:#fff4cc;padding:12px 16px;border-left:4px solid #d6a514;border-radius:0 6px 6px 0;margin-bottom:14px}
-.ok{background:#e8f6ed;padding:12px;border-radius:6px;border-left:4px solid #2d9a5f}
-.err{background:#fdecea;padding:12px;border-radius:6px;border-left:4px solid #d32f2f;color:#b71c1c}
+.warn{background:#fffbeb;padding:12px 16px;border-left:4px solid #f59e0b;border-radius:0 6px 6px 0;margin-bottom:14px;color:#92400e}
+.ok{background:#f0fdf4;padding:12px;border-radius:6px;border-left:4px solid #22c55e;color:#166534}
+.err{background:#fef2f2;padding:12px;border-radius:6px;border-left:4px solid #ef4444;color:#991b1b}
 .scroll{overflow:auto;max-height:520px}
-.mapping-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid #eee;padding:8px 0;align-items:center}
-.filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end}
-pre{background:#f4f6f8;padding:12px;border-radius:6px;overflow:auto;font-size:12px;max-height:300px}
+.mapping-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-bottom:1px solid #f1f5f9;padding:8px 0;align-items:center}
+pre{background:#f1f5f9;padding:12px;border-radius:6px;overflow:auto;font-size:12px;max-height:300px;color:#0f172a}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Outils internes CRI</h1>
-  <div class="warn">Cette page est réservée à l'administration. Le jeton est conservé uniquement en mémoire dans cet onglet et n'est jamais enregistré.</div>
-  <div class="card">
-    <label for="cri-token">Jeton administrateur Directus</label>
-    <input id="cri-token" type="password" autocomplete="off" style="width:460px;max-width:100%" placeholder="Collez votre token admin ici">
+  <div class="header-bar">
+    <h1>Tableau de bord et outils CRI</h1>
+    <div id="cri-auth-status" style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#0f2744;background:#f1f5f9;border:1px solid #cbd5e1;padding:6px 12px;border-radius:6px">
+      <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e"></span>
+      Session Directus active
+    </div>
   </div>
-  <div class="tabs">
-    <button class="tab-btn active" id="cri-btn-dash">Tableau de bord CRI</button>
-    <button class="tab-btn" id="cri-btn-import">Import Excel projets</button>
-  </div>
-  <section id="cri-dash">
-    <div class="card">
-      <h2>Filtres communs</h2>
-      <div class="filters-grid">
-        <label>Du <input id="cri-from" type="date"></label>
-        <label>Au <input id="cri-to" type="date"></label>
-        <label>Province <select id="cri-province"><option value="">Toutes</option></select></label>
-        <label>Secteur <select id="cri-secteur"><option value="">Tous</option></select></label>
-        <label>Projet <select id="cri-projet"><option value="">Tous</option></select></label>
+  <div id="cri-auth-error" class="hidden"></div>
+  <div id="cri-content">
+    <div class="tabs">
+      <button class="tab-btn active" id="cri-btn-dash">Tableau de bord CRI</button>
+      <button class="tab-btn" id="cri-btn-import">Import Excel projets</button>
+    </div>
+    <section id="cri-dash">
+      <div class="card filters-card">
+        <div class="card-header">
+          <h2>Période et filtres</h2>
+        </div>
+        <div class="filters-grid">
+          <div class="filter-item">
+            <label for="cri-from">Du</label>
+            <input id="cri-from" type="date">
+          </div>
+          <div class="filter-item">
+            <label for="cri-to">Au</label>
+            <input id="cri-to" type="date">
+          </div>
+          <div class="filter-item">
+            <label for="cri-province">Province</label>
+            <select id="cri-province"><option value="">Toutes les provinces</option></select>
+          </div>
+          <div class="filter-item">
+            <label for="cri-secteur">Secteur</label>
+            <select id="cri-secteur"><option value="">Tous les secteurs</option></select>
+          </div>
+          <div class="filter-item">
+            <label for="cri-projet">Projet</label>
+            <select id="cri-projet"><option value="">Tous les projets</option></select>
+          </div>
+          <div class="filter-item filter-btn-item">
+            <button class="btn primary btn-filter" id="cri-btn-analytics">Actualiser</button>
+          </div>
+        </div>
       </div>
-      <button class="btn primary" id="cri-btn-analytics">Actualiser</button>
-    </div>
-    <div id="cri-analytics"></div>
-  </section>
-  <section id="cri-imp" class="hidden">
-    <div class="card">
-      <h2>1. Charger le classeur Excel</h2>
-      <input id="cri-xlsx" type="file" accept=".xlsx">
-      <label style="margin-top:12px">Feuille <select id="cri-sheet"></select></label>
-      <button class="btn" id="cri-btn-sheet">Lire la feuille</button>
-    </div>
-    <div id="cri-mapping" class="card hidden"></div>
-    <div id="cri-preview" class="card hidden"></div>
-  </section>
+      <div id="cri-analytics"></div>
+    </section>
+    <section id="cri-imp" class="hidden">
+      <div class="card">
+        <div class="card-header"><h2>1. Charger le classeur Excel</h2></div>
+        <input id="cri-xlsx" type="file" accept=".xlsx">
+        <div style="margin-top:12px" class="filter-item">
+          <label for="cri-sheet">Feuille</label>
+          <select id="cri-sheet"></select>
+        </div>
+        <button class="btn" id="cri-btn-sheet" style="margin-top:10px">Lire la feuille</button>
+      </div>
+      <div id="cri-mapping" class="card hidden"></div>
+      <div id="cri-preview" class="card hidden"></div>
+    </section>
+  </div>
 </div>
 <script src="/cri-admin/app.js"></script>
 </body>
@@ -170,8 +223,32 @@ export default {
   'use strict';
 
   function $id(id) { return document.getElementById(id); }
-  function token() { var t = $id('cri-token'); return t ? t.value.trim() : ''; }
-  function authHdr() { return { 'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json' }; }
+
+  var cachedToken = null;
+
+  async function getAccessToken() {
+    if (cachedToken) return cachedToken;
+
+    try {
+      var r = await fetch('/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ mode: 'json' })
+      });
+      if (r.ok) {
+        var res = await r.json();
+        if (res && res.data && res.data.access_token) {
+          cachedToken = res.data.access_token;
+          return cachedToken;
+        }
+      }
+    } catch (e) {
+      console.warn('[CRI] Refresh cookie non disponible:', e);
+    }
+
+    return null;
+  }
 
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"]/g, function(c) {
@@ -179,33 +256,134 @@ export default {
     });
   }
 
+  function showAuthError(msg) {
+    var errDiv = $id('cri-auth-error');
+    var statusDiv = $id('cri-auth-status');
+    var contentDiv = $id('cri-content');
+    if (errDiv) {
+      errDiv.classList.remove('hidden');
+      errDiv.innerHTML = '<div class="err" style="margin-bottom:16px;font-size:14px;">' +
+        '<strong>Accès refusé :</strong> ' + esc(msg || 'Veuillez vous connecter à l\\\'interface d\\\'administration Directus.') +
+        '<div style="margin-top:12px"><a href="/admin/login" class="btn primary" style="text-decoration:none;display:inline-block">Se connecter à Directus (/admin)</a></div>' +
+        '</div>';
+    }
+    if (statusDiv) statusDiv.classList.add('hidden');
+    if (contentDiv) contentDiv.classList.add('hidden');
+  }
+
   async function api(path, opts) {
     opts = opts || {};
+    var tok = await getAccessToken();
+    var headers = Object.assign({}, opts.headers || {});
+    if (tok) {
+      headers['Authorization'] = 'Bearer ' + tok;
+    }
+    headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+
     var r = await fetch('/cri-admin' + path, Object.assign({}, opts, {
-      headers: Object.assign({}, authHdr(), opts.headers || {})
+      credentials: 'same-origin',
+      headers: headers
     }));
     var b = await r.json();
-    if (!r.ok) throw new Error(b.message || JSON.stringify(b));
+    if (!r.ok) {
+      if (r.status === 401 || r.status === 403 || (b && b.error === 'ADMIN_REQUIRED')) {
+        cachedToken = null;
+        showAuthError(b.message || 'Accès administrateur requis.');
+      }
+      throw new Error(b.message || JSON.stringify(b));
+    }
     return b.data;
   }
 
-  function mkTable(title, rows) {
-    if (!rows || !rows.length) return '<div class="card"><h2>' + esc(title) + '</h2><p>Aucune donn\\u00e9e.</p></div>';
-    var keys = Object.keys(rows[0]);
-    return '<div class="card scroll"><h2>' + esc(title) + '</h2><table><thead><tr>' +
-      keys.map(function(k){return '<th>'+esc(k)+'</th>';}).join('') +
-      '</tr></thead><tbody>' +
-      rows.map(function(r){return '<tr>'+keys.map(function(k){
-        var v=r[k]; return '<td>'+esc(Array.isArray(v)?v.join(', '):v)+'</td>';
-      }).join('')+'</tr>';}).join('') +
-      '</tbody></table></div>';
+  function formatMonth(val) {
+    if (!val) return '—';
+    var str = String(val).trim();
+    var match = str.match(/^(\d{4})-(\d{2})/);
+    if (match) {
+      var year = parseInt(match[1], 10);
+      var month = parseInt(match[2], 10) - 1;
+      try {
+        var d = new Date(Date.UTC(year, month, 15));
+        var formatted = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d);
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+      } catch (e) {
+        return str;
+      }
+    }
+    return str;
   }
 
-  function fillSel(id, items, lbl, val) {
+  var COL_LABELS = {
+    'mois': 'Mois',
+    'projet': 'Projet',
+    'secteur': 'Secteur',
+    'provinces': 'Province(s)',
+    'province': 'Province',
+    'demandes': 'Demandes',
+    'investisseurs_distincts': 'Investisseurs distincts',
+    'validees': 'Validées',
+    'refusees': 'Refusées',
+    'telechargees': 'Téléchargements',
+    'titre': 'Titre',
+    'code_projet': 'Code projet',
+    'type_projet': 'Type de projet',
+    'champs_manquants': 'Champs manquants',
+  };
+
+  var NUMERIC_COLS = new Set([
+    'demandes',
+    'investisseurs_distincts',
+    'validees',
+    'refusees',
+    'telechargees'
+  ]);
+
+  function formatCell(colKey, val) {
+    if (val == null || val === '') return '<span style="color:#94a3b8;">—</span>';
+    if (colKey === 'mois') return esc(formatMonth(val));
+    if (Array.isArray(val)) return esc(val.join(', ') || '—');
+    if (colKey === 'secteur') {
+      var s = String(val);
+      return esc(s.charAt(0).toUpperCase() + s.slice(1));
+    }
+    return esc(val);
+  }
+
+  function mkTable(title, rows, opts) {
+    opts = opts || {};
+    var note = opts.note ? '<div class="table-note">' + esc(opts.note) + '</div>' : '';
+    if (!rows || !rows.length) {
+      return '<div class="card"><div class="card-header"><h2>' + esc(title) + '</h2></div><p class="empty-state">Aucune donnée disponible pour cette sélection.</p>' + note + '</div>';
+    }
+
+    var hiddenKeys = new Set(opts.hiddenKeys || ['projet_id']);
+    var keys = opts.columns || Object.keys(rows[0]).filter(function(k) { return !hiddenKeys.has(k); });
+    var headerOverride = opts.headerLabels || {};
+
+    return '<div class="card"><div class="card-header"><h2>' + esc(title) + '</h2></div>' +
+      note +
+      '<div class="table-wrap"><table><thead><tr>' +
+      keys.map(function(k) {
+        var label = headerOverride[k] || COL_LABELS[k] || esc(k.replace(/_/g, ' '));
+        var isNum = NUMERIC_COLS.has(k);
+        return '<th class="' + (isNum ? 'num' : '') + '">' + esc(label) + '</th>';
+      }).join('') +
+      '</tr></thead><tbody>' +
+      rows.map(function(r) {
+        return '<tr>' + keys.map(function(k) {
+          var isNum = NUMERIC_COLS.has(k);
+          return '<td class="' + (isNum ? 'num' : '') + '">' + formatCell(k, r[k]) + '</td>';
+        }).join('') + '</tr>';
+      }).join('') +
+      '</tbody></table></div></div>';
+  }
+
+  function fillSel(id, items, lbl, val, allLabel) {
     lbl = lbl || 'name'; val = val || 'name';
+    allLabel = allLabel || (id === 'cri-province' ? 'Toutes les provinces' : (id === 'cri-secteur' ? 'Tous les secteurs' : 'Tous les projets'));
     var s = $id(id); if (!s) return;
     var cur = s.value;
-    s.innerHTML = '<option value="">Tous</option>' +
+    s.innerHTML = '<option value="">' + esc(allLabel) + '</option>' +
       items.map(function(x){return '<option value="'+esc(x[val])+'">'+esc(x[lbl])+'</option>';}).join('');
     s.value = cur;
   }
@@ -227,6 +405,14 @@ export default {
     console.log('[CRI] Tab =>', id);
   }
 
+  var KPI_CONFIG = [
+    { key: 'demandes_bp', label: 'Demandes de Business Plan' },
+    { key: 'investisseurs_distincts', label: 'Investisseurs distincts' },
+    { key: 'demandes_validees', label: 'Demandes validées' },
+    { key: 'demandes_refusees', label: 'Demandes refusées' },
+    { key: 'bp_telecharges', label: 'Business Plans téléchargés' },
+  ];
+
   // ── Analytics ──────────────────────────────────────────────────────────────
   async function loadAnalytics() {
     var div = $id('cri-analytics');
@@ -238,21 +424,23 @@ export default {
     });
     try {
       var d = await api('/analytics?' + q.toString());
-      fillSel('cri-province', d.facets.provinces.map(function(n){return {name:n};}));
-      fillSel('cri-secteur', d.facets.secteurs.map(function(n){return {name:n};}));
-      fillSel('cri-projet', d.facets.projets, 'titre', 'id');
+      fillSel('cri-province', d.facets.provinces.map(function(n){return {name:n};}), 'name', 'name', 'Toutes les provinces');
+      fillSel('cri-secteur', d.facets.secteurs.map(function(n){return {name:n};}), 'name', 'name', 'Tous les secteurs');
+      fillSel('cri-projet', d.facets.projets, 'titre', 'id', 'Tous les projets');
       if (div) div.innerHTML =
         '<div class="grid">' +
-        Object.entries(d.kpis).map(function(e){
-          return '<div class="kpi"><b>'+esc(e[1])+'</b><span>'+esc(e[0].replace(/_/g,' '))+'</span></div>';
-        }).join('') + '</div>' +
-        mkTable('Projets les plus demand\\u00e9s', d.projets) +
-        mkTable('Secteurs les plus sollicit\\u00e9s', d.secteurs) +
-        mkTable('Provinces les plus sollicit\\u00e9es', d.provinces) +
-        mkTable('\\u00c9volution mensuelle', d.timeline) +
-        mkTable('D\\u00e9tail par projet', d.detail);
+        KPI_CONFIG.map(function(kpi) {
+          var val = d.kpis && d.kpis[kpi.key] != null ? d.kpis[kpi.key] : 0;
+          return '<div class="kpi"><b>' + esc(val) + '</b><span>' + esc(kpi.label) + '</span></div>';
+        }).join('') +
+        '</div>' +
+        mkTable('Projets les plus demandés', d.projets, { hiddenKeys: ['projet_id'] }) +
+        mkTable('Secteurs les plus sollicités', d.secteurs, { headerLabels: { name: 'Secteur' } }) +
+        mkTable('Provinces les plus sollicitées', d.provinces, { headerLabels: { name: 'Province' }, note: d.note_provinces }) +
+        mkTable('Évolution mensuelle', d.timeline) +
+        mkTable('Détail par projet', d.detail, { hiddenKeys: ['projet_id'] });
     } catch(e) {
-      if (div) div.innerHTML = '<div class="err">Erreur : '+esc(e.message)+'<br>V\\u00e9rifiez le jeton.</div>';
+      if (div) div.innerHTML = '<div class="err">Erreur : '+esc(e.message)+'</div>';
     }
   }
 
@@ -442,6 +630,7 @@ export default {
     if (xl)    xl.addEventListener('change', function(){ loadWorkbook().catch(function(e){alert('Erreur Excel: '+e.message);}); });
 
     console.log('[CRI] Listeners: dash='+!!bDash+' imp='+!!bImp+' analytics='+!!bAna+' sheet='+!!bSh+' xlsx='+!!xl);
+    loadAnalytics();
   }
 
   if (document.readyState === 'loading') {
@@ -475,12 +664,28 @@ export default {
         }).map(({ name, ...x }) => x);
         const sectorStats = statsForGroups(groupRows(rows, (r) => r.secteur));
         const provinceStats = statsForGroups(groupRows(rows, (r) => r.provinces));
-        const timeline = statsForGroups(groupRows(rows, (r) => r.date_created ? String(r.date_created).slice(0,7) : null))
-          .map((x) => ({ mois: x.name, demandes: x.demandes, investisseurs_distincts: x.investisseurs_distincts }))
+        const timeline = statsForGroups(groupRows(rows, (r) => getMonthKey(r.date_created)))
+          .map((x) => ({
+            mois: x.name,
+            demandes: x.demandes,
+            investisseurs_distincts: x.investisseurs_distincts,
+            validees: x.validees,
+            refusees: x.refusees,
+            telechargees: x.telechargees,
+          }))
           .sort((a,b) => a.mois.localeCompare(b.mois));
         const detail = projectStats.map((p) => {
           const sample = rows.find((r) => String(r.projet) === String(p.projet_id)) || {};
-          return { ...p, secteur: sample.secteur || '', provinces: sample.provinces || [] };
+          return {
+            projet: p.projet,
+            secteur: sample.secteur || '',
+            provinces: sample.provinces || [],
+            demandes: p.demandes,
+            investisseurs_distincts: p.investisseurs_distincts,
+            validees: p.validees,
+            refusees: p.refusees,
+            telechargees: p.telechargees,
+          };
         });
         res.json({ data: {
           kpis: {

@@ -11,7 +11,7 @@ function normalizedText(value) {
     .toLowerCase();
 }
 
-export default function CataloguePage({ projects, loading, dataSource, loadError, onOpenProject }) {
+export default function CataloguePage({ projects, loading, loadError, onOpenProject }) {
   const [search, setSearch] = useState('');
   const [sector, setSector] = useState('');
   const [province, setProvince] = useState('');
@@ -61,10 +61,7 @@ export default function CataloguePage({ projects, loading, dataSource, loadError
               <h2>Explorez les projets de la région</h2>
               <p>Recherchez et filtrez les opportunités selon vos priorités d'investissement.</p>
             </div>
-            <div className="source-badge" title="Source des données actuellement affichées">
-              <span className={`source-dot source-${dataSource}`}></span>
-              {dataSource === 'directus' ? 'Données Directus' : 'Mode démonstration'}
-            </div>
+
           </div>
 
           {loadError && <div className="info-banner">{loadError}</div>}

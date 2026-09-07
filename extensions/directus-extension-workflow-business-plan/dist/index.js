@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
+import { renderTemplate, renderEmailBody } from '../../shared/template.js';
 import { InvalidPayloadError } from '@directus/errors';
 
 function asArray(value) {
@@ -7,20 +8,31 @@ function asArray(value) {
   return [value];
 }
 
-function getLinkTtlHours(env) {
-  const parsed = Number(env.BUSINESS_PLAN_LINK_TTL_HOURS ?? 168);
+function getLinkTtlHours(env, settings) {
+  let parsed = null;
+  if (settings && settings.duree_validite_lien_heures !== null && settings.duree_validite_lien_heures !== undefined) {
+    const fromSettings = Number(settings.duree_validite_lien_heures);
+    if (Number.isFinite(fromSettings) && fromSettings > 0) {
+      parsed = fromSettings;
+    }
+  }
 
-  if (!Number.isFinite(parsed) || parsed <= 0) {
-    return 168;
+  if (parsed === null) {
+    const fromEnv = Number(env.BUSINESS_PLAN_LINK_TTL_HOURS ?? 168);
+    if (Number.isFinite(fromEnv) && fromEnv > 0) {
+      parsed = fromEnv;
+    } else {
+      parsed = 168;
+    }
   }
 
   return Math.min(parsed, 24 * 30);
 }
 
-function createAccessToken(env) {
+function createAccessToken(env, settings) {
   const rawToken = randomBytes(32).toString('hex');
   const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-  const ttlHours = getLinkTtlHours(env);
+  const ttlHours = getLinkTtlHours(env, settings);
   const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 
   return {
@@ -137,6 +149,8 @@ export default ({ filter, action }, { services, env, logger }) => {
       const requestIds = asArray(keys);
       if (!requestIds.length) return;
 
+      const settings = await context.database('parametres_plateforme').first();
+
       for (const requestId of requestIds) {
         try {
           const demande = await loadRequest(context.database, requestId);
@@ -159,7 +173,7 @@ export default ({ filter, action }, { services, env, logger }) => {
           }
 
           if (payload.statut === 'validee') {
-            const access = createAccessToken(env);
+            const access = createAccessToken(env, settings);
             const accessUrl = buildAccessUrl(env, access.rawToken);
             const now = new Date();
 
@@ -180,24 +194,58 @@ export default ({ filter, action }, { services, env, logger }) => {
               knex: context.database,
             });
 
+            const templateData = {
+              prenom: demande.prenom || '',
+              nom: demande.nom || '',
+              nom_complet: fullName(demande),
+              titre_projet: demande.projet_titre || '',
+              projet_titre: demande.projet_titre || '',
+              code_projet: demande.projet_id ? String(demande.projet_id) : '',
+              lien_telechargement: accessUrl,
+              duree_validite_heures: String(access.ttlHours),
+              nom_contact: settings?.email_nom_contact || 'Contact CRI',
+              email_contact: settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local',
+              email_contact_cri: settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local',
+            };
+
+            const signatureValidation = settings?.email_signature || '';
+
+            const defaultSubject = `Accès validé au Business Plan - ${demande.projet_titre}`;
+            // Corps par défaut : renderEmailBody injectera la signature (Cas A si non vide)
+            const defaultBodyTemplate = [
+              `Bonjour {{nom_complet}},`,
+              '',
+              `Votre demande d'accès au Business Plan du projet « {{titre_projet}} » a été validée par le CRI.`,
+              '',
+              'Vous pouvez télécharger le document à partir du lien sécurisé suivant :',
+              '{{lien_telechargement}}',
+              '',
+              `Ce lien est valable pendant {{duree_validite_heures}} heure(s).`,
+              "Ne transmettez pas ce lien à une autre personne.",
+            ].join('\n');
+
+            const validationSubjectTpl =
+              settings?.email_validation_bp_objet?.trim() ||
+              settings?.email_bp_validation_objet?.trim();
+
+            const validationBodyTpl =
+              settings?.email_validation_bp_message?.trim() ||
+              settings?.email_bp_validation_corps?.trim();
+
+            const subject = validationSubjectTpl
+              ? renderTemplate(validationSubjectTpl, templateData)
+              : defaultSubject;
+
+            const text = validationBodyTpl
+              ? renderEmailBody(validationBodyTpl, templateData, signatureValidation)
+              : renderEmailBody(defaultBodyTemplate, templateData, signatureValidation);
+
             try {
               await mailService.send({
                 to: demande.email,
                 from: env.EMAIL_FROM || 'no-reply@cri.local',
-                subject: `Accès validé au Business Plan - ${demande.projet_titre}`,
-                text: [
-                  `Bonjour ${fullName(demande)},`,
-                  '',
-                  `Votre demande d'accès au Business Plan du projet « ${demande.projet_titre} » a été validée par le CRI.`,
-                  '',
-                  'Vous pouvez télécharger le document à partir du lien sécurisé suivant :',
-                  accessUrl,
-                  '',
-                  `Ce lien est valable pendant ${access.ttlHours} heure(s).`,
-                  "Ne transmettez pas ce lien à une autre personne.",
-                  '',
-                  `Contact CRI : ${env.CRI_CONTACT_EMAIL || 'contact@cri.local'}`,
-                ].join('\n'),
+                subject,
+                text,
               });
 
               await context.database('demandes_business_plan')
@@ -244,19 +292,52 @@ export default ({ filter, action }, { services, env, logger }) => {
               knex: context.database,
             });
 
+            const templateData = {
+              prenom: demande.prenom || '',
+              nom: demande.nom || '',
+              nom_complet: fullName(demande),
+              titre_projet: demande.projet_titre || '',
+              projet_titre: demande.projet_titre || '',
+              code_projet: demande.projet_id ? String(demande.projet_id) : '',
+              nom_contact: settings?.email_nom_contact || 'Contact CRI',
+              email_contact: settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local',
+              email_contact_cri: settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local',
+            };
+
+            const signatureRefus = settings?.email_signature || '';
+
+            const defaultSubject = `Réponse à votre demande de Business Plan - ${demande.projet_titre}`;
+            // Corps par défaut : renderEmailBody injectera la signature (Cas A si non vide)
+            const defaultBodyTemplate = [
+              `Bonjour {{nom_complet}},`,
+              '',
+              `Votre demande d'accès au Business Plan du projet « {{titre_projet}} » n'a pas été validée.`,
+              '',
+              'Pour toute précision, vous pouvez contacter le CRI.',
+            ].join('\n');
+
+            const refusSubjectTpl =
+              settings?.email_refus_bp_objet?.trim() ||
+              settings?.email_bp_refus_objet?.trim();
+
+            const refusBodyTpl =
+              settings?.email_refus_bp_message?.trim() ||
+              settings?.email_bp_refus_corps?.trim();
+
+            const subject = refusSubjectTpl
+              ? renderTemplate(refusSubjectTpl, templateData)
+              : defaultSubject;
+
+            const text = refusBodyTpl
+              ? renderEmailBody(refusBodyTpl, templateData, signatureRefus)
+              : renderEmailBody(defaultBodyTemplate, templateData, signatureRefus);
+
             try {
               await mailService.send({
                 to: demande.email,
                 from: env.EMAIL_FROM || 'no-reply@cri.local',
-                subject: `Réponse à votre demande de Business Plan - ${demande.projet_titre}`,
-                text: [
-                  `Bonjour ${fullName(demande)},`,
-                  '',
-                  `Votre demande d'accès au Business Plan du projet « ${demande.projet_titre} » n'a pas été validée.`,
-                  '',
-                  'Pour toute précision, vous pouvez contacter le CRI.',
-                  `Contact CRI : ${env.CRI_CONTACT_EMAIL || 'contact@cri.local'}`,
-                ].join('\n'),
+                subject,
+                text,
               });
 
               await context.database('demandes_business_plan')
