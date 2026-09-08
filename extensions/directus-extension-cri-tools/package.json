@@ -1,19 +1,16 @@
 {
-  "name": "directus-extension-workflow-business-plan",
+  "name": "directus-extension-cri-tools",
   "version": "1.0.0",
   "type": "module",
   "keywords": [
     "directus",
     "directus-extension",
-    "hook"
+    "module"
   ],
   "directus:extension": {
-    "type": "hook",
+    "type": "module",
     "path": "dist/index.js",
     "source": "src/index.js",
-    "host": "^12.0.0"
-  },
-  "dependencies": {
-    "@directus/errors": "2.3.1"
+    "host": "^12.2.0"
   }
 }

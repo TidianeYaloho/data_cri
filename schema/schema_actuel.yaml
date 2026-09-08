@@ -43,7 +43,9 @@ collections:
       hidden: false
       icon: description
       item_duplication_fields: null
-      note: Demandes de Business Plans effectuées par les investisseurs.
+      note: >-
+        Demandes de Business Plans : traitement agent, lien sécurisé et suivi
+        des notifications/téléchargements.
       preview_url: null
       singleton: false
       sort: null
@@ -70,8 +72,9 @@ collections:
       icon: groups
       item_duplication_fields: null
       note: >-
-        Investisseurs ayant rempli le formulaire de contact pour accéder aux
-        Business Plans.
+        Investisseurs identifiés sur la plateforme. Les comptes activés sont
+        liés à Directus et les nouvelles inscriptions nécessitent une
+        vérification de l'adresse e-mail.
       preview_url: null
       singleton: false
       sort: null
@@ -96,7 +99,8 @@ collections:
       group: null
       hidden: false
       icon: null
-      item_duplication_fields: null
+      item_duplication_fields:
+        - email_signature
       note: null
       preview_url: null
       singleton: true
@@ -380,7 +384,7 @@ fields:
       options:
         placeholder: entrez le tire du projet ici (opportunité)
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 7
       special: null
@@ -461,21 +465,21 @@ fields:
       note: null
       options:
         choices:
-          - text: 'Agriculture '
-            value: 'agriculture '
-          - text: 'Énergie '
-            value: 'énergie '
+          - text: Agriculture
+            value: agriculture
+          - text: Énergie
+            value: énergie
           - text: Industrie
             value: industrie
-          - text: 'Environnement '
+          - text: Environnement
             value: environnement
           - text: Tourisme
-            value: 'tourisme '
+            value: tourisme
           - text: Service
             value: service
-        placeholder: 'selectionner le secteur '
+        placeholder: Sélectionner le secteur
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 9
       special: null
@@ -516,7 +520,7 @@ fields:
       options:
         placeholder: 'entrez la filière '
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 10
       special: null
@@ -559,7 +563,7 @@ fields:
         softLength: 500
         trim: true
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 11
       special: null
@@ -573,56 +577,6 @@ fields:
       data_type: text
       default_value: null
       max_length: null
-      numeric_precision: null
-      numeric_scale: null
-      is_nullable: true
-      is_unique: false
-      is_indexed: false
-      is_primary_key: false
-      is_generated: false
-      generation_expression: null
-      has_auto_increment: false
-      foreign_key_table: null
-      foreign_key_column: null
-  - collection: PROJETS
-    field: province
-    type: string
-    meta:
-      collection: PROJETS
-      conditions: null
-      display: null
-      display_options: null
-      field: province
-      group: null
-      hidden: false
-      interface: select-dropdown
-      note: null
-      options:
-        choices:
-          - text: Tan-Tan
-            value: tan-tan
-          - text: Sidi-ifni
-            value: sidi-ifni
-          - text: Guelmim
-            value: guelmim
-          - text: Assa_Zag
-            value: assa_zag
-        placeholder: 'selectionnez la province '
-      readonly: false
-      required: true
-      searchable: true
-      sort: 12
-      special: null
-      translations: null
-      validation: null
-      validation_message: null
-      width: full
-    schema:
-      name: province
-      table: PROJETS
-      data_type: character varying
-      default_value: null
-      max_length: 255
       numeric_precision: null
       numeric_scale: null
       is_nullable: true
@@ -649,7 +603,7 @@ fields:
       note: null
       options: null
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 13
       special: null
@@ -689,7 +643,7 @@ fields:
       note: null
       options: null
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 14
       special: null
@@ -823,7 +777,8 @@ fields:
       note: null
       options:
         allowedMimeTypes:
-          - application/*
+          - application/pdf
+          - text/html
       readonly: false
       required: false
       searchable: true
@@ -851,6 +806,103 @@ fields:
       has_auto_increment: false
       foreign_key_table: directus_files
       foreign_key_column: id
+  - collection: PROJETS
+    field: type_projet
+    type: string
+    meta:
+      collection: PROJETS
+      conditions: null
+      display: null
+      display_options: null
+      field: type_projet
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Type métier officiel du projet.
+      options:
+        choices:
+          - text: Grand projet
+            value: grand_projet
+          - text: TPME
+            value: tpme
+          - text: Porteur de projet
+            value: porteur_projet
+      readonly: false
+      required: false
+      searchable: true
+      sort: 18
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: type_projet
+      table: PROJETS
+      data_type: character varying
+      default_value: null
+      max_length: 32
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: PROJETS
+    field: provinces
+    type: json
+    meta:
+      collection: PROJETS
+      conditions: null
+      display: null
+      display_options: null
+      field: provinces
+      group: null
+      hidden: false
+      interface: select-multiple-dropdown
+      note: Provinces concernées par le projet.
+      options:
+        choices:
+          - text: Guelmim
+            value: Guelmim
+          - text: Assa-Zag
+            value: Assa-Zag
+          - text: Sidi Ifni
+            value: Sidi Ifni
+          - text: Tan-Tan
+            value: Tan-Tan
+      readonly: false
+      required: false
+      searchable: true
+      sort: 19
+      special:
+        - cast-json
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: provinces
+      table: PROJETS
+      data_type: json
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: demandes_business_plan
     field: id
     type: integer
@@ -1007,8 +1059,6 @@ fields:
             value: validee
           - text: Refusée
             value: refusee
-          - text: Téléchargée
-            value: telechargee
       readonly: false
       required: true
       searchable: true
@@ -1064,6 +1114,308 @@ fields:
       name: date_created
       table: demandes_business_plan
       data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: access_token_hash
+    type: string
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: null
+      display_options: null
+      field: access_token_hash
+      group: null
+      hidden: true
+      interface: input
+      note: Empreinte SHA-256 du token d'accès. Le token brut n'est jamais stocké.
+      options: null
+      readonly: true
+      required: false
+      searchable: false
+      sort: 6
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: access_token_hash
+      table: demandes_business_plan
+      data_type: character varying
+      default_value: null
+      max_length: 64
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: access_expires_at
+    type: timestamp
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: access_expires_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Date d'expiration du lien sécurisé.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 7
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: access_expires_at
+      table: demandes_business_plan
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: date_decision
+    type: timestamp
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_decision
+      group: null
+      hidden: false
+      interface: datetime
+      note: Date à laquelle la demande a été validée ou refusée.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 8
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_decision
+      table: demandes_business_plan
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: date_telechargement
+    type: timestamp
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: date_telechargement
+      group: null
+      hidden: false
+      interface: datetime
+      note: Date du premier téléchargement réussi du Business Plan.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 9
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: date_telechargement
+      table: demandes_business_plan
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: notification_email_statut
+    type: string
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: labels
+      display_options:
+        choices:
+          - text: Non requis
+            value: non_requis
+          - text: Non envoyé
+            value: non_envoye
+          - text: Envoyé
+            value: envoye
+          - text: Erreur
+            value: erreur
+      field: notification_email_statut
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: État du dernier e-mail de décision envoyé à l'investisseur.
+      options:
+        choices:
+          - text: Non requis
+            value: non_requis
+          - text: Non envoyé
+            value: non_envoye
+          - text: Envoyé
+            value: envoye
+          - text: Erreur
+            value: erreur
+      readonly: true
+      required: false
+      searchable: true
+      sort: 10
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: notification_email_statut
+      table: demandes_business_plan
+      data_type: character varying
+      default_value: non_envoye
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: notification_email_date
+    type: timestamp
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: notification_email_date
+      group: null
+      hidden: false
+      interface: datetime
+      note: Date d'envoi du dernier e-mail de décision.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: notification_email_date
+      table: demandes_business_plan
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: demandes_business_plan
+    field: notification_email_erreur
+    type: text
+    meta:
+      collection: demandes_business_plan
+      conditions: null
+      display: null
+      display_options: null
+      field: notification_email_erreur
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: Message technique en cas d'échec d'envoi d'e-mail.
+      options: null
+      readonly: true
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: notification_email_erreur
+      table: demandes_business_plan
+      data_type: text
       default_value: null
       max_length: null
       numeric_precision: null
@@ -1379,7 +1731,7 @@ fields:
       options:
         trim: true
       readonly: false
-      required: true
+      required: false
       searchable: true
       sort: 8
       special: null
@@ -1395,7 +1747,7 @@ fields:
       max_length: 255
       numeric_precision: null
       numeric_scale: null
-      is_nullable: false
+      is_nullable: true
       is_unique: false
       is_indexed: false
       is_primary_key: false
@@ -1446,6 +1798,277 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: investisseurs
+    field: directus_user
+    type: uuid
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: user
+      display_options: null
+      field: directus_user
+      group: null
+      hidden: false
+      interface: select-dropdown-m2o
+      note: >-
+        Compte d'authentification lié à cet investisseur. Géré automatiquement
+        par la plateforme.
+      options:
+        template: '{{avatar}} {{first_name}} {{last_name}}'
+      readonly: true
+      required: false
+      searchable: true
+      sort: 10
+      special:
+        - m2o
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: directus_user
+      table: investisseurs
+      data_type: uuid
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: true
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: directus_users
+      foreign_key_column: id
+  - collection: investisseurs
+    field: email_verification_token_hash
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: email_verification_token_hash
+      group: null
+      hidden: true
+      interface: input
+      note: >-
+        Empreinte du jeton de vérification d'e-mail. Champ technique géré
+        automatiquement.
+      options: null
+      readonly: true
+      required: false
+      searchable: false
+      sort: 11
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_verification_token_hash
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: investisseurs
+    field: email_verification_expires_at
+    type: timestamp
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: email_verification_expires_at
+      group: null
+      hidden: true
+      interface: datetime
+      note: Date d'expiration du lien de vérification d'e-mail. Champ technique.
+      options: null
+      readonly: true
+      required: false
+      searchable: false
+      sort: 12
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_verification_expires_at
+      table: investisseurs
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: investisseurs
+    field: email_verifie_at
+    type: timestamp
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: datetime
+      display_options:
+        relative: true
+      field: email_verifie_at
+      group: null
+      hidden: false
+      interface: datetime
+      note: Date à laquelle l'adresse e-mail du compte investisseur a été vérifiée.
+      options: null
+      readonly: true
+      required: false
+      searchable: false
+      sort: 13
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_verifie_at
+      table: investisseurs
+      data_type: timestamp with time zone
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: investisseurs
+    field: secteur
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: secteur
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: Secteur sélectionné par l’investisseur.
+      options:
+        choices:
+          - text: Agriculture
+            value: agriculture
+          - text: Énergie
+            value: énergie
+          - text: Industrie
+            value: industrie
+          - text: Environnement
+            value: environnement
+          - text: Tourisme
+            value: tourisme
+          - text: Service
+            value: service
+        placeholder: Sélectionner le secteur
+      readonly: false
+      required: true
+      searchable: true
+      sort: 14
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: secteur
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: investisseurs
+    field: province
+    type: string
+    meta:
+      collection: investisseurs
+      conditions: null
+      display: null
+      display_options: null
+      field: province
+      group: null
+      hidden: false
+      interface: select-dropdown
+      note: null
+      options:
+        choices:
+          - text: Guelmim
+            value: Guelmim
+          - text: Assa-Zag
+            value: Assa-Zag
+          - text: Sidi Ifni
+            value: Sidi Ifni
+          - text: Tan-Tan
+            value: Tan-Tan
+      readonly: false
+      required: false
+      searchable: true
+      sort: 15
+      special: null
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: province
+      table: investisseurs
+      data_type: character varying
+      default_value: null
+      max_length: 32
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
   - collection: parametres_plateforme
     field: id
     type: integer
@@ -1463,12 +2086,12 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 1
+      sort: 90
       special: null
       translations: null
       validation: null
       validation_message: null
-      width: full
+      width: half
     schema:
       name: id
       table: parametres_plateforme
@@ -1504,7 +2127,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 2
+      sort: 93
       special:
         - user-created
       translations: null
@@ -1546,7 +2169,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 3
+      sort: 91
       special:
         - date-created
       translations: null
@@ -1588,7 +2211,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 4
+      sort: 94
       special:
         - user-updated
       translations: null
@@ -1630,7 +2253,7 @@ fields:
       readonly: true
       required: false
       searchable: true
-      sort: 5
+      sort: 92
       special:
         - date-updated
       translations: null
@@ -1666,16 +2289,22 @@ fields:
       group: null
       hidden: false
       interface: boolean
-      note: null
+      note: >-
+        Active ou désactive la gestion des comptes investisseurs et
+        l'authentification dédiée.
       options:
-        label: Comptes investisseurs activés
+        label: Activer l'espace et les comptes investisseurs
       readonly: false
       required: true
       searchable: true
-      sort: 6
+      sort: 21
       special:
         - cast-boolean
-      translations: null
+      translations:
+        - language: fr-FR
+          translation: Comptes investisseurs
+        - language: en-US
+          translation: Comptes investisseurs
       validation: null
       validation_message: null
       width: full
@@ -1708,7 +2337,9 @@ fields:
       group: null
       hidden: false
       interface: select-dropdown
-      note: null
+      note: >-
+        Définit si le Business Plan nécessite une validation manuelle, un accès
+        direct ou s'il est désactivé.
       options:
         choices:
           - text: Désactivé
@@ -1720,12 +2351,16 @@ fields:
       readonly: false
       required: true
       searchable: true
-      sort: 7
+      sort: 31
       special: null
-      translations: null
+      translations:
+        - language: fr-FR
+          translation: Mode d'accès au Business Plan
+        - language: en-US
+          translation: Mode d'accès au Business Plan
       validation: null
       validation_message: null
-      width: full
+      width: half
     schema:
       name: mode_acces_business_plan
       table: parametres_plateforme
@@ -1743,6 +2378,683 @@ fields:
       has_auto_increment: false
       foreign_key_table: null
       foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_nom_contact
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_nom_contact
+      group: null
+      hidden: false
+      interface: input
+      note: Nom affiché de l'expéditeur ou du contact CRI (ex. Contact CRI).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 11
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Nom du contact
+        - language: en-US
+          translation: Nom du contact
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_nom_contact
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: Contact CRI
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_adresse_contact
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_adresse_contact
+      group: null
+      hidden: false
+      interface: input
+      note: Adresse e-mail affichée pour contacter le CRI (ex. contact@cri.local).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 12
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Adresse e-mail de contact
+        - language: en-US
+          translation: Adresse e-mail de contact
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_adresse_contact
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: contact@cri.local
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: duree_validite_lien_heures
+    type: integer
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: duree_validite_lien_heures
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Durée de validité des liens de téléchargement sécurisés en heures (ex.
+        168 pour 7 jours).
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 32
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Durée de validité du lien (heures)
+        - language: en-US
+          translation: Durée de validité du lien (heures)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: duree_validite_lien_heures
+      table: parametres_plateforme
+      data_type: integer
+      default_value: 168
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_signature
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_signature
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Signature insérée en bas des e-mails. Variables : {{nom_contact}},
+        {{email_contact}}
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Signature des e-mails
+        - language: en-US
+          translation: Signature des e-mails
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_signature
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_creation_compte_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_creation_compte_objet
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Objet de l'e-mail de vérification et d'activation envoyé à
+        l'investisseur.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 41
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – création du compte
+        - language: en-US
+          translation: Objet – création du compte
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_creation_compte_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_creation_compte_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_creation_compte_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{email}}, {{lien_telechargement}},
+        {{duree_validite_heures}}, {{nom_contact}}, {{email_contact}}. La
+        signature configurée dans les paramètres généraux est ajoutée
+        automatiquement à la fin de l'e-mail. La variable {{signature}} reste
+        disponible si vous souhaitez positionner manuellement la signature à un
+        endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 42
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – création du compte
+        - language: en-US
+          translation: Message – création du compte
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_creation_compte_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_validation_bp_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_validation_bp_objet
+      group: null
+      hidden: false
+      interface: input
+      note: Objet de l'e-mail notifiant la validation de l'accès au Business Plan.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 51
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – demande validée
+        - language: en-US
+          translation: Objet – demande validée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_validation_bp_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_validation_bp_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_validation_bp_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{nom_complet}}, {{projet_titre}},
+        {{code_projet}}, {{lien_telechargement}}, {{duree_validite_heures}},
+        {{nom_contact}}, {{email_contact}}. La signature configurée dans les
+        paramètres généraux est ajoutée automatiquement à la fin de l'e-mail. La
+        variable {{signature}} reste disponible si vous souhaitez positionner
+        manuellement la signature à un endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 52
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – demande validée
+        - language: en-US
+          translation: Message – demande validée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_validation_bp_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_refus_bp_objet
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_refus_bp_objet
+      group: null
+      hidden: false
+      interface: input
+      note: Objet de l'e-mail notifiant le refus d'accès au Business Plan.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 61
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Objet – demande refusée
+        - language: en-US
+          translation: Objet – demande refusée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_refus_bp_objet
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: null
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_refus_bp_message
+    type: text
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_refus_bp_message
+      group: null
+      hidden: false
+      interface: input-multiline
+      note: >-
+        Variables : {{prenom}}, {{nom}}, {{nom_complet}}, {{projet_titre}},
+        {{code_projet}}, {{nom_contact}}, {{email_contact}}. La signature
+        configurée dans les paramètres généraux est ajoutée automatiquement à la
+        fin de l'e-mail. La variable {{signature}} reste disponible si vous
+        souhaitez positionner manuellement la signature à un endroit précis.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 62
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Message – demande refusée
+        - language: en-US
+          translation: Message – demande refusée
+      validation: null
+      validation_message: null
+      width: full
+    schema:
+      name: email_refus_bp_message
+      table: parametres_plateforme
+      data_type: text
+      default_value: null
+      max_length: null
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: duree_validite_verification_compte_heures
+    type: integer
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: duree_validite_verification_compte_heures
+      group: null
+      hidden: false
+      interface: input
+      note: >-
+        Durée pendant laquelle le lien envoyé lors de la création d’un compte
+        investisseur reste valide.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 22
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Durée de validité du lien de vérification du compte (heures)
+        - language: en-US
+          translation: Durée de validité du lien de vérification du compte (heures)
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: duree_validite_verification_compte_heures
+      table: parametres_plateforme
+      data_type: integer
+      default_value: 24
+      max_length: null
+      numeric_precision: 32
+      numeric_scale: 0
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: section_general
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_general
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: settings
+        title: Paramètres généraux
+      readonly: false
+      required: false
+      searchable: true
+      sort: 10
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_comptes
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_comptes
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: group
+        title: Compte investisseur
+      readonly: false
+      required: false
+      searchable: true
+      sort: 20
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_acces_bp
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_acces_bp
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: description
+        title: Accès Business Plan
+      readonly: false
+      required: false
+      searchable: true
+      sort: 30
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_creation
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_creation
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: mark_email_read
+        title: E-mails – création de compte
+      readonly: false
+      required: false
+      searchable: true
+      sort: 40
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_validation
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_validation
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: check_circle
+        title: E-mails – validation
+      readonly: false
+      required: false
+      searchable: true
+      sort: 50
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
+  - collection: parametres_plateforme
+    field: section_emails_refus
+    type: alias
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: section_emails_refus
+      group: null
+      hidden: false
+      interface: presentation-divider
+      note: null
+      options:
+        hr: true
+        icon: cancel
+        title: E-mails – refus
+      readonly: false
+      required: false
+      searchable: true
+      sort: 60
+      special:
+        - alias
+        - no-data
+      translations: null
+      validation: null
+      validation_message: null
+      width: full
 systemFields:
   - collection: directus_activity
     field: timestamp
@@ -1919,6 +3231,27 @@ relations:
       constraint_name: demandes_business_plan_investisseur_foreign
       on_update: NO ACTION
       on_delete: RESTRICT
+  - collection: investisseurs
+    field: directus_user
+    related_collection: directus_users
+    meta:
+      junction_field: null
+      many_collection: investisseurs
+      many_field: directus_user
+      one_allowed_collections: null
+      one_collection: directus_users
+      one_collection_field: null
+      one_deselect_action: nullify
+      one_field: null
+      sort_field: null
+    schema:
+      table: investisseurs
+      column: directus_user
+      foreign_key_table: directus_users
+      foreign_key_column: id
+      constraint_name: investisseurs_directus_user_foreign
+      on_update: NO ACTION
+      on_delete: SET NULL
   - collection: parametres_plateforme
     field: user_updated
     related_collection: directus_users

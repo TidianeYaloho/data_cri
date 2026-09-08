@@ -12,6 +12,16 @@ import {
   verifyInvestorEmail,
 } from '../api/directus.js';
 
+
+const INVESTOR_SECTORS = [
+  { value: 'agriculture', label: 'Agriculture' },
+  { value: 'énergie', label: 'Énergie' },
+  { value: 'industrie', label: 'Industrie' },
+  { value: 'environnement', label: 'Environnement' },
+  { value: 'tourisme', label: 'Tourisme' },
+  { value: 'service', label: 'Service' },
+];
+
 const initialRegisterForm = {
   prenom: '',
   nom: '',
@@ -19,8 +29,8 @@ const initialRegisterForm = {
   password: '',
   telephone: '',
   entreprise: '',
-  fonction: '',
-  pays: 'Maroc',
+  secteur: '',
+  province: 'Guelmim',
 };
 
 const statusLabels = {
@@ -84,8 +94,8 @@ export default function InvestorAccountModal({
         nom: account.profil.nom || '',
         telephone: account.profil.telephone || '',
         entreprise: account.profil.entreprise || '',
-        fonction: account.profil.fonction || '',
-        pays: account.profil.pays || '',
+        secteur: account.profil.secteur || '',
+        province: account.profil.province || 'Guelmim',
       });
     }
   }, [account]);
@@ -426,11 +436,14 @@ export default function InvestorAccountModal({
         >
           ×
         </button>
+        <div className="modal-body">
 
         {showAccount ? (
+
           <>
             <p className="eyebrow">Espace investisseur</p>
             <h2 id="investor-account-title">Bonjour {account.profil.prenom}</h2>
+            <p className="modal-subtitle">Accédez à votre espace investisseur</p>
             <p className="modal-intro">
               Suivez vos demandes de Business Plan et gérez vos informations.
             </p>
@@ -520,16 +533,21 @@ export default function InvestorAccountModal({
                     <input name="telephone" value={profileForm.telephone} onChange={updateProfile} />
                   </label>
                   <label>
-                    Entreprise
+                    Entreprise / Porteur de projet
                     <input name="entreprise" value={profileForm.entreprise} onChange={updateProfile} />
                   </label>
                   <label>
-                    Fonction
-                    <input name="fonction" value={profileForm.fonction} onChange={updateProfile} />
+                    Secteur
+                    <select required name="secteur" value={profileForm.secteur} onChange={updateProfile}>
+                      <option value="">Sélectionner un secteur</option>
+                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    </select>
                   </label>
                   <label>
-                    Pays
-                    <input required name="pays" value={profileForm.pays} onChange={updateProfile} />
+                    Province
+                    <select required name="province" value={profileForm.province} onChange={updateProfile}>
+                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                    </select>
                   </label>
                 </div>
                 <button
@@ -688,16 +706,21 @@ export default function InvestorAccountModal({
                     <input name="telephone" value={registerForm.telephone} onChange={updateRegister} />
                   </label>
                   <label>
-                    Entreprise
+                    Entreprise / Porteur de projet
                     <input name="entreprise" value={registerForm.entreprise} onChange={updateRegister} />
                   </label>
                   <label>
-                    Fonction
-                    <input name="fonction" value={registerForm.fonction} onChange={updateRegister} />
+                    Secteur
+                    <select required name="secteur" value={registerForm.secteur} onChange={updateRegister}>
+                      <option value="">Sélectionner un secteur</option>
+                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                    </select>
                   </label>
                   <label>
-                    Pays
-                    <input required name="pays" value={registerForm.pays} onChange={updateRegister} />
+                    Province
+                    <select required name="province" value={registerForm.province} onChange={updateRegister}>
+                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                    </select>
                   </label>
                 </div>
                 <button
@@ -789,13 +812,12 @@ export default function InvestorAccountModal({
                 </button>
               </form>
             )}
-
-            {message && (
-              <div className={`form-message form-message-${status}`}>{message}</div>
-            )}
           </>
         )}
+
+
       </div>
+        </div>
     </div>
   );
 }

@@ -51,7 +51,7 @@ export default function App() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [accountAction, setAccountAction] = useState(() => readInitialAccountAction());
   const [loading, setLoading] = useState(true);
-  const [dataSource, setDataSource] = useState('directus');
+
   const [loadError, setLoadError] = useState('');
 
   const refreshInvestorAccount = useCallback(async () => {
@@ -94,13 +94,13 @@ export default function App() {
         if (!active) return;
 
         setProjects(data);
-        setDataSource('directus');
+
       } catch (error) {
         if (!active) return;
 
         console.error('Erreur lors du chargement des projets :', error);
         setProjects([]);
-        setDataSource('directus-error');
+
         setLoadError(
           "Impossible de charger les projets pour le moment. Vérifiez que Directus est bien démarré.",
         );
@@ -198,7 +198,7 @@ export default function App() {
           <CataloguePage
             projects={projects}
             loading={loading}
-            dataSource={dataSource}
+
             loadError={loadError}
             onOpenProject={openProject}
           />

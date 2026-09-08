@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import Hero from '../components/Hero.jsx';
 import FilterBar from '../components/FilterBar.jsx';
 import ProjectCard from '../components/ProjectCard.jsx';
+import { OFFICIAL_PROVINCES, projectProvinces } from '../utils/projectFields.js';
 
 function normalizedText(value) {
   return String(value || '')
@@ -10,7 +11,7 @@ function normalizedText(value) {
     .toLowerCase();
 }
 
-export default function CataloguePage({ projects, loading, dataSource, loadError, onOpenProject }) {
+export default function CataloguePage({ projects, loading, loadError, onOpenProject }) {
   const [search, setSearch] = useState('');
   const [sector, setSector] = useState('');
   const [province, setProvince] = useState('');
@@ -20,10 +21,7 @@ export default function CataloguePage({ projects, loading, dataSource, loadError
     [projects],
   );
 
-  const provinces = useMemo(
-    () => [...new Set(projects.map((project) => project.province).filter(Boolean))].sort(),
-    [projects],
-  );
+  const provinces = OFFICIAL_PROVINCES;
 
   const filteredProjects = useMemo(() => {
     const term = normalizedText(search);
@@ -34,12 +32,12 @@ export default function CataloguePage({ projects, loading, dataSource, loadError
         project.code_projet,
         project.secteur,
         project.filiere,
-        project.province,
+        ...projectProvinces(project),
         project.description,
       ].some((value) => normalizedText(value).includes(term));
 
       const matchesSector = !sector || project.secteur === sector;
-      const matchesProvince = !province || project.province === province;
+      const matchesProvince = !province || projectProvinces(project).includes(province);
 
       return matchesSearch && matchesSector && matchesProvince;
     });
@@ -63,10 +61,7 @@ export default function CataloguePage({ projects, loading, dataSource, loadError
               <h2>Explorez les projets de la région</h2>
               <p>Recherchez et filtrez les opportunités selon vos priorités d'investissement.</p>
             </div>
-            <div className="source-badge" title="Source des données actuellement affichées">
-              <span className={`source-dot source-${dataSource}`}></span>
-              {dataSource === 'directus' ? 'Données Directus' : 'Mode démonstration'}
-            </div>
+
           </div>
 
           {loadError && <div className="info-banner">{loadError}</div>}

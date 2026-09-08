@@ -8,6 +8,8 @@ function isValidRawToken(value) {
   return /^[a-f0-9]{64}$/i.test(String(value || ''));
 }
 
+const ALLOWED_BUSINESS_PLAN_MIME_TYPES = new Set(['application/pdf', 'text/html']);
+
 export default {
   id: 'business-plan-access',
 
@@ -112,6 +114,13 @@ export default {
         );
 
         const filename = file.filename_download || `business-plan-${demande.projet_id}`;
+
+        if (!ALLOWED_BUSINESS_PLAN_MIME_TYPES.has(file.type)) {
+          return res.status(415).json({
+            error: 'BUSINESS_PLAN_FORMAT_NOT_ALLOWED',
+            message: "Le Business Plan doit être un fichier PDF ou HTML.",
+          });
+        }
 
         res.attachment(filename);
         res.setHeader('Content-Type', file.type || 'application/octet-stream');

@@ -8,6 +8,8 @@ export const mockProjects = [
     description:
       "Projet de transformation et de valorisation de productions agricoles régionales afin de renforcer la valeur ajoutée locale.",
     province: 'Guelmim',
+    provinces: ['Guelmim', 'Sidi Ifni'],
+    type_projet: 'grand_projet',
     investissement_mad: 42000000,
     nombre_postes: 34,
     statut_publication: 'publie',
@@ -22,6 +24,8 @@ export const mockProjects = [
     description:
       "Projet démonstratif destiné à illustrer la présentation d'une opportunité d'investissement dans les énergies renouvelables.",
     province: 'Tan-Tan',
+    provinces: ['Tan-Tan'],
+    type_projet: 'tpme',
     investissement_mad: 76000000,
     nombre_postes: 21,
     statut_publication: 'publie',
