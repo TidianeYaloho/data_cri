@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { renderTemplate, renderEmailBody } from '../../shared/template.js';
+import { renderTemplate, renderEmailBody, buildFromHeader } from '../../shared/template.js';
 
 const normalizeText = (value) =>
   typeof value === 'string' ? value.trim() : '';
@@ -137,7 +137,7 @@ async function sendVerificationEmail({
 
   await mailService.send({
     to: profile.email,
-    from: env.EMAIL_FROM || 'no-reply@cri.local',
+    from: buildFromHeader(env, settings),
     subject,
     text,
   });
@@ -175,6 +175,7 @@ async function readSettings(database) {
     .select([
       'comptes_investisseurs',
       'mode_acces_business_plan',
+      'email_nom_expediteur',
       'email_nom_contact',
       'email_adresse_contact',
       'email_signature',
@@ -187,6 +188,7 @@ async function readSettings(database) {
   return {
     comptes_investisseurs: settings?.comptes_investisseurs === true,
     mode_acces_business_plan: settings?.mode_acces_business_plan ?? 'validation',
+    email_nom_expediteur: settings?.email_nom_expediteur,
     email_nom_contact: settings?.email_nom_contact,
     email_adresse_contact: settings?.email_adresse_contact,
     email_signature: settings?.email_signature,

@@ -101,4 +101,22 @@ export function renderEmailBody(template, variables = {}, signature = '') {
   return renderTemplate(template, data);
 }
 
-export default { renderTemplate, renderEmailBody };
+/**
+ * Construit l'en-tête "From" d'un e-mail transactionnel CRI en combinant le nom d'expéditeur
+ * configurable depuis Directus et l'adresse technique issue de l'environnement (EMAIL_FROM).
+ *
+ * Format attendu : "CRI Guelmim-Oued Noun <tiddomb@gmail.com>"
+ *
+ * @param {Record<string, any>} [env={}] - Variables d'environnement Directus (EMAIL_FROM).
+ * @param {Record<string, any> | null} [settings=null] - Enregistrement de parametres_plateforme.
+ * @returns {string} - Chaîne formatée "Nom <email>".
+ */
+export function buildFromHeader(env = {}, settings = null) {
+  const senderName = (settings?.email_nom_expediteur || '').trim() || 'CRI Guelmim-Oued Noun';
+  const rawEmail = (env?.EMAIL_FROM || 'no-reply@cri.local').trim();
+  const cleanEmail = rawEmail.replace(/^[<"'\s]+|[>"'\s]+$/g, '').trim() || 'no-reply@cri.local';
+  const cleanName = senderName.replace(/[<>"\r\n]/g, '').trim() || 'CRI Guelmim-Oued Noun';
+  return { name: cleanName, address: cleanEmail };
+}
+
+export default { renderTemplate, renderEmailBody, buildFromHeader };

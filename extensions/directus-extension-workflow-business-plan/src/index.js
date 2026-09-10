@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { renderTemplate, renderEmailBody } from '../../shared/template.js';
+import { renderTemplate, renderEmailBody, buildFromHeader } from '../../shared/template.js';
 import { InvalidPayloadError } from '@directus/errors';
 
 function asArray(value) {
@@ -80,55 +80,129 @@ export default ({ filter, action }, { services, env, logger }) => {
   const { MailService } = services;
 
   /*
-   * Garde-fou AVANT la sauvegarde de l'agent.
-   * Une demande ne peut pas être validée si elle ne peut pas réellement
-   * déboucher sur un Business Plan téléchargeable.
+   * Sécurisation lors de la création manuelle d'une demande via l'API/UI Directus.
+   * Le statut initial doit être obligatoirement "demandee".
+   */
+  filter(
+    'demandes_business_plan.items.create',
+    async (payload) => {
+      if (payload?.statut && payload.statut !== 'demandee') {
+        throw new InvalidPayloadError({
+          reason: 'Toute nouvelle demande créée manuellement doit recevoir le statut "Demandée".'
+        });
+      }
+      if (payload) {
+        payload.statut = 'demandee';
+      }
+      return payload;
+    }
+  );
+
+  /*
+   * Garde-fou et sécurisation stricte de la matrice des transitions de statut.
+   *
+   * RÈGLES DES TRANSITIONS MANELLES (UPDATE) :
+   * - Depuis 'demandee'   : 'validee' (autorisé) ou 'refusee' (autorisé).
+   * - Depuis 'validee'    : aucune modification manuelle de statut autorisée.
+   * - Depuis 'refusee'    : aucune modification manuelle de statut autorisée.
+   * - Depuis 'telechargee': aucune modification manuelle de statut autorisée.
+   *
+   * Les mises à jour d'autres champs sans modification de 'statut' restent autorisées.
    */
   filter(
     'demandes_business_plan.items.update',
     async (payload, meta, context) => {
-      if (payload?.statut === 'telechargee') {
+      if (!payload || !Object.prototype.hasOwnProperty.call(payload, 'statut')) {
+        return payload;
+      }
+
+      const targetStatut = payload.statut;
+
+      // 1. Contrôles de la valeur cible
+      if (targetStatut === 'telechargee') {
         throw new InvalidPayloadError({
           reason: 'Le statut "Téléchargée" est attribué automatiquement après un téléchargement réel du Business Plan.'
         });
       }
 
-      if (payload?.statut !== 'validee') return payload;
+      if (targetStatut === 'demandee') {
+        throw new InvalidPayloadError({
+          reason: 'Le statut "Demandée" est attribué automatiquement à la création. Seuls les statuts "Validée" et "Refusée" peuvent être sélectionnés.'
+        });
+      }
+
+      if (!['validee', 'refusee'].includes(targetStatut)) {
+        throw new InvalidPayloadError({
+          reason: `Statut "${targetStatut}" non autorisé. Seules les décisions "Validée" et "Refusée" sont autorisées.`
+        });
+      }
 
       const keys = asArray(meta?.keys);
       if (!keys.length) return payload;
 
-      const settings = await context.database('parametres_plateforme')
-        .select(['mode_acces_business_plan'])
-        .first();
-
-      if (settings?.mode_acces_business_plan === 'desactive') {
-        throw new Error(
-          "Impossible de valider la demande : l'accès aux Business Plans est désactivé dans les paramètres de la plateforme.",
-        );
-      }
-
-      const rows = await context.database('demandes_business_plan as d')
+      // 2. Vérification de l'état actuel en base de données et application stricte de la matrice
+      const existingDemandes = await context.database('demandes_business_plan as d')
         .leftJoin('PROJETS as p', 'p.id', 'd.projet')
         .select([
           'd.id',
+          'd.statut',
           'p.business_plan',
           'p.status_publication',
           'p.archived',
         ])
         .whereIn('d.id', keys);
 
-      for (const row of rows) {
-        if (!row.business_plan) {
-          throw new Error(
-            `Impossible de valider la demande ${row.id} : aucun Business Plan n'est associé au projet.`,
-          );
+      for (const row of existingDemandes) {
+        const currentStatut = row.statut;
+
+        // Si l'état actuel est déjà validee, refusee ou telechargee -> aucune modification manuelle de statut
+        if (currentStatut === 'validee') {
+          throw new InvalidPayloadError({
+            reason: `La demande #${row.id} a déjà été validée. Son statut ne peut plus être modifié manuellement.`
+          });
         }
 
-        if (row.status_publication !== 'publie' || row.archived === true) {
-          throw new Error(
-            `Impossible de valider la demande ${row.id} : le projet n'est pas publié ou est archivé.`,
-          );
+        if (currentStatut === 'refusee') {
+          throw new InvalidPayloadError({
+            reason: `La demande #${row.id} a déjà été refusée. Son statut ne peut plus être modifié manuellement.`
+          });
+        }
+
+        if (currentStatut === 'telechargee') {
+          throw new InvalidPayloadError({
+            reason: `La demande #${row.id} a déjà été téléchargée. Son statut ne peut plus être modifié.`
+          });
+        }
+
+        if (currentStatut !== 'demandee') {
+          throw new InvalidPayloadError({
+            reason: `Le statut actuel ("${currentStatut}") de la demande #${row.id} ne permet pas cette modification.`
+          });
+        }
+
+        // L'état actuel est 'demandee'. Si passage à 'validee', vérifier les prérequis du projet
+        if (targetStatut === 'validee') {
+          const settings = await context.database('parametres_plateforme')
+            .select(['mode_acces_business_plan'])
+            .first();
+
+          if (settings?.mode_acces_business_plan === 'desactive') {
+            throw new InvalidPayloadError({
+              reason: "Impossible de valider la demande : l'accès aux Business Plans est désactivé dans les paramètres de la plateforme."
+            });
+          }
+
+          if (!row.business_plan) {
+            throw new InvalidPayloadError({
+              reason: `Impossible de valider la demande #${row.id} : aucun Business Plan n'est associé au projet.`
+            });
+          }
+
+          if (row.status_publication !== 'publie' || row.archived === true) {
+            throw new InvalidPayloadError({
+              reason: `Impossible de valider la demande #${row.id} : le projet n'est pas publié ou est archivé.`
+            });
+          }
         }
       }
 
@@ -243,7 +317,7 @@ export default ({ filter, action }, { services, env, logger }) => {
             try {
               await mailService.send({
                 to: demande.email,
-                from: env.EMAIL_FROM || 'no-reply@cri.local',
+                from: buildFromHeader(env, settings),
                 subject,
                 text,
               });
@@ -335,7 +409,7 @@ export default ({ filter, action }, { services, env, logger }) => {
             try {
               await mailService.send({
                 to: demande.email,
-                from: env.EMAIL_FROM || 'no-reply@cri.local',
+                from: buildFromHeader(env, settings),
                 subject,
                 text,
               });
