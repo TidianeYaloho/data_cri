@@ -167,6 +167,12 @@ pre{background:#f1f5f9;padding:12px;border-radius:6px;overflow:auto;font-size:12
 <div class="wrap">
   <div class="header-bar">
     <h1>Tableau de bord et outils CRI</h1>
+    <a
+      href="/admin/content"
+      target="_top"
+      class="btn"
+      style="text-decoration:none;font-weight:600;"
+    >Retour à l’accueil</a>
   </div>
   <div id="cri-auth-error" class="hidden"></div>
   <div id="cri-content">
@@ -505,6 +511,37 @@ export default {
     if (modal) modal.classList.add('hidden');
   }
 
+
+  function showMessageModal(title, message) {
+    var old = $id('message-modal');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var modal = document.createElement('div');
+    modal.id = 'message-modal';
+
+    modal.innerHTML =
+      '<div class="modal-backdrop">' +
+        '<div class="modal-dialog" role="dialog" aria-modal="true">' +
+          '<h2>' + esc(title) + '</h2>' +
+          '<p>' + esc(message) + '</p>' +
+          '<div class="modal-actions">' +
+            '<button class="btn primary" id="message-modal-close">Fermer</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(modal);
+
+    var closeBtn = $id('message-modal-close');
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function() {
+        if (modal && modal.parentNode) {
+          modal.parentNode.removeChild(modal);
+        }
+      });
+    }
+  }
   // ---------- CSS extensions (injected into ADMIN_HTML) ----------
 
 
@@ -767,10 +804,10 @@ export default {
     ['province:Sidi Ifni','Marqueur province : Sidi Ifni'],['province:Assa-Zag','Marqueur province : Assa-Zag']];
 
   function readSelectedSheet() {
-    if (!workbookInfo) { alert('Chargez d’abord un fichier Excel.'); return; }
+    if (!workbookInfo) { showMessageModal('Fichier Excel requis', 'Chargez d’abord un fichier Excel avant de lire la feuille.'); return; }
     var ss = $id('cri-sheet');
     var info = workbookInfo.sheets[Number(ss ? ss.value : 0)];
-    if (!info) { alert('Feuille introuvable.'); return; }
+    if (!info) { showMessageModal('Feuille introuvable', 'La feuille sélectionnée est introuvable dans ce fichier Excel.'); return; }
     var shared = [];
     if (zipEntries['xl/sharedStrings.xml']) {
       shared = Array.from(xml(txt('xl/sharedStrings.xml')).querySelectorAll('si')).map(function(si){
@@ -789,7 +826,7 @@ export default {
       });
       rows.push(obj);
     });
-    if (!rows.length) { alert('Feuille vide.'); return; }
+    if (!rows.length) { showMessageModal('Feuille vide', 'La feuille sélectionnée ne contient aucune donnée à importer.'); return; }
     var cols=Object.keys(rows[0]).sort(function(a,b){return colNum(a)-colNum(b);});
     var headers=cols.map(function(c){return rows[0][c];});
     currentRows=rows.slice(1).map(function(r){
@@ -915,7 +952,7 @@ export default {
     if (bImp)  bImp.addEventListener('click', function(){ showTab('imp'); });
     if (bAna)  bAna.addEventListener('click', loadAnalytics);
     if (bSh)   bSh.addEventListener('click', readSelectedSheet);
-    if (xl)    xl.addEventListener('change', function(){ loadWorkbook().catch(function(e){alert('Erreur Excel: '+e.message);}); });
+    if (xl)    xl.addEventListener('change', function(){ loadWorkbook().catch(function(e){showMessageModal('Erreur de lecture Excel', e.message || 'Impossible de lire ce fichier Excel.');}); });
 
     console.log('[CRI] Listeners: dash='+!!bDash+' imp='+!!bImp+' analytics='+!!bAna+' sheet='+!!bSh+' xlsx='+!!xl);
     loadAnalytics();
