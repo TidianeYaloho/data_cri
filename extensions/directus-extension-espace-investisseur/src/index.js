@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { renderTemplate, renderEmailBody, buildFromHeader } from '../../shared/template.js';
+import { renderTemplate, renderEmailBody, renderEmailHtml, buildFromHeader } from '../../shared/template.js';
 
 const normalizeText = (value) =>
   typeof value === 'string' ? value.trim() : '';
@@ -135,11 +135,19 @@ async function sendVerificationEmail({
     text = renderEmailBody(defaultBodyTemplate, variables, signature);
   }
 
+  const html = renderEmailHtml(text, [
+    {
+      url: verificationUrl,
+      label: 'Confirmer mon adresse e-mail',
+    },
+  ]);
+
   await mailService.send({
     to: profile.email,
     from: buildFromHeader(env, settings),
     subject,
     text,
+    html,
   });
 }
 

@@ -119,4 +119,38 @@ export function buildFromHeader(env = {}, settings = null) {
   return { name: cleanName, address: cleanEmail };
 }
 
-export default { renderTemplate, renderEmailBody, buildFromHeader };
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Transforme le corps texte d'un e-mail en version HTML.
+ * Les URL sensibles restent dans href mais sont remplacées visuellement
+ * par un libellé court et explicite.
+ */
+export function renderEmailHtml(text, links = []) {
+  let html = escapeHtml(typeof text === 'string' ? text : '');
+
+  for (const link of links) {
+    const url = String(link?.url || '').trim();
+    if (!url) continue;
+
+    const label = String(link?.label || 'Ouvrir le lien').trim();
+    const escapedUrl = escapeHtml(url);
+    const escapedLabel = escapeHtml(label);
+    const safeHref = url.replace(/"/g, '&quot;');
+
+    const anchor = `<a href="${safeHref}">${escapedLabel}</a>`;
+
+    html = html.split(escapedUrl).join(anchor);
+  }
+
+  return html.replace(/\r?\n/g, '<br>');
+}
+export default { renderTemplate, renderEmailBody, renderEmailHtml, buildFromHeader };

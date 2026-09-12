@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { renderTemplate, renderEmailBody, buildFromHeader } from '../../shared/template.js';
+import { renderTemplate, renderEmailBody, renderEmailHtml, buildFromHeader } from '../../shared/template.js';
 import { InvalidPayloadError } from '@directus/errors';
 
 function asArray(value) {
@@ -314,12 +314,20 @@ export default ({ filter, action }, { services, env, logger }) => {
               ? renderEmailBody(validationBodyTpl, templateData, signatureValidation)
               : renderEmailBody(defaultBodyTemplate, templateData, signatureValidation);
 
+            const html = renderEmailHtml(text, [
+              {
+                url: accessUrl,
+                label: 'Télécharger le Business Plan',
+              },
+            ]);
+
             try {
               await mailService.send({
                 to: demande.email,
                 from: buildFromHeader(env, settings),
                 subject,
                 text,
+                html,
               });
 
               await context.database('demandes_business_plan')
