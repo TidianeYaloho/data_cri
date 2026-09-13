@@ -88,6 +88,14 @@ export default function InvestorAccountModal({
   const verificationRequestRef = useRef({ token: null, promise: null });
 
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     if (account?.profil) {
       setProfileForm({
         prenom: account.profil.prenom || '',
@@ -584,6 +592,12 @@ export default function InvestorAccountModal({
                   ? 'Choisissez un nouveau mot de passe pour votre compte investisseur.'
                   : 'Votre espace permet de suivre vos demandes de Business Plan.'}
             </p>
+
+            {message && (
+              <div className={`form-message form-message-${status}`} aria-live="polite">
+                {message}
+              </div>
+            )}
 
             {['login', 'register'].includes(view) && (
               <div className="account-tabs">

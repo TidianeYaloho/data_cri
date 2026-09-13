@@ -295,9 +295,9 @@ main {
 .hero-grid {
   min-height: 470px;
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
-  gap: clamp(32px, 5vw, 70px);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  grid-template-rows: 1fr auto;
+  gap: clamp(24px, 4vw, 48px);
   position: relative;
   z-index: 1;
   padding: clamp(36px, 5vw, 60px) 0;
@@ -306,6 +306,9 @@ main {
 .hero-content {
   max-width: 760px;
   min-width: 0;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
 }
 
 .eyebrow {
@@ -343,6 +346,13 @@ main {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.hero-actions-bottom {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  margin-top: 0;
 }
 
 .button {
@@ -398,7 +408,9 @@ main {
 }
 
 .hero-panel {
-  align-self: center;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 22px;
@@ -427,6 +439,20 @@ main {
   line-height: 1.5;
   font-size: 13px;
   color: #d7e8ef;
+}
+
+@media (max-width: 960px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .hero-content,
+  .hero-panel,
+  .hero-actions-bottom {
+    grid-column: 1;
+    grid-row: auto;
+  }
 }
 
 /* ==========================================================================
@@ -508,7 +534,7 @@ main {
 /* Filters Card Grid */
 .filters-card {
   display: grid;
-  grid-template-columns: minmax(260px, 1.7fr) minmax(170px, 0.8fr) minmax(170px, 0.8fr) auto;
+  grid-template-columns: minmax(220px, 1.5fr) minmax(125px, 0.7fr) minmax(125px, 0.7fr) minmax(145px, 0.8fr) auto;
   gap: 12px;
   align-items: end;
   background: white;
@@ -685,24 +711,7 @@ main {
 .sector-tourisme { background: linear-gradient(135deg, #35649a, #1f4b79); }
 .sector-service, .sector-services { background: linear-gradient(135deg, #27628d, #15476e); }
 
-.project-code {
-  position: absolute;
-  z-index: 2;
-  top: 12px;
-  left: 12px;
-  padding: 6px 9px;
-  background: rgba(7, 47, 72, 0.78);
-  color: white;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  backdrop-filter: blur(6px);
-  max-width: calc(100% - 24px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 
 .project-card-body {
   padding: clamp(16px, 2.4vw, 21px);
@@ -799,7 +808,7 @@ main {
   margin-top: auto;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   border: 0;
   border-top: 1px solid #e5edef;
@@ -813,11 +822,7 @@ main {
   min-height: 44px;
 }
 
-.project-link span {
-  color: var(--cri-teal-dark);
-  font-size: 20px;
-  line-height: 1;
-}
+
 
 .skeleton-card {
   height: 500px;
@@ -845,66 +850,6 @@ main {
 .empty-state p {
   color: var(--muted);
   margin: 8px 0 18px;
-}
-
-/* ==========================================================================
-   Investor Journey
-   ========================================================================== */
-
-.journey-section {
-  padding: clamp(48px, 6vw, 78px) 0;
-  background: #eef5f7;
-  border-top: 1px solid #dce8ed;
-}
-
-.journey-grid {
-  display: grid;
-  grid-template-columns: 0.7fr 1.3fr;
-  gap: clamp(30px, 5vw, 70px);
-  align-items: start;
-}
-
-.journey-steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-
-.journey-steps li {
-  display: flex;
-  gap: 14px;
-  padding: 16px;
-  background: white;
-  border: 1px solid #dce7eb;
-  border-radius: 16px;
-  min-width: 0;
-}
-
-.journey-steps li > span {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #e2f6f5;
-  color: #087f86;
-  font-weight: 850;
-  font-size: 12px;
-}
-
-.journey-steps strong {
-  display: block;
-  margin-top: 1px;
-}
-
-.journey-steps p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 /* ==========================================================================
@@ -947,28 +892,7 @@ main {
   min-width: 0;
 }
 
-.detail-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
 
-.detail-tags span {
-  padding: 6px 11px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
-  color: #d9edf2;
-  font-size: 12px;
-}
-
-.project-detail-code {
-  margin: 16px 0 8px;
-  color: var(--cri-teal);
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
 
 .detail-copy > p:last-child {
   color: #d8e9f0;
@@ -1115,18 +1039,15 @@ main {
 .modal {
   width: min(760px, 100%);
   max-height: calc(100dvh - 32px);
-  max-height: calc(100vh - 32px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  max-width: 90vw;
-  max-height: 80vh;
   position: relative;
   border-radius: 22px;
   background: white;
-  padding: clamp(20px, 4vw, 32px);
-  padding-right: clamp(48px, 6vw, 60px);
   box-shadow: 0 35px 90px rgba(4, 31, 47, 0.3);
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 6px 4px 6px 6px;
 }
 
 .investor-account-modal {
@@ -1183,18 +1104,20 @@ main {
 }
 
 .request-form {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 12px;
 }
 .modal-body {
-  max-height: 80vh;
+  flex: 1 1 auto;
   overflow-y: auto;
-  padding-right: 8px;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(14px, 3.5vw, 24px);
+  padding-right: clamp(40px, 5.5vw, 52px);
 }
 
 @media (max-width: 767px) {
@@ -1215,8 +1138,8 @@ main {
 
 .form-grid input,
 .form-grid select {
-  height: 48px;
-  min-height: 48px;
+  height: 44px;
+  min-height: 44px;
   border: 1px solid #d8e4e9;
   border-radius: 10px;
   padding: 0 12px;
@@ -1238,8 +1161,8 @@ main {
 }
 
 .form-message {
-  margin-top: 16px;
-  padding: 12px 14px;
+  margin-top: 14px;
+  padding: 10px 14px;
   border-radius: 10px;
   line-height: 1.45;
   font-size: 13px;
@@ -1251,9 +1174,9 @@ main {
 .form-message-error { color: #8a3d3d; background: #fff0f0; border: 1px solid #f3cdcd; }
 
 .form-submit {
-  margin-top: 18px;
+  margin-top: 16px;
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
 }
 
 .privacy-note {
@@ -1283,14 +1206,14 @@ main {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
-  margin-top: 20px;
-  padding: 5px;
+  margin-top: 16px;
+  padding: 4px;
   border-radius: 12px;
   background: #eef4f6;
 }
 
 .account-tabs button {
-  min-height: 44px;
+  min-height: 40px;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -1314,12 +1237,12 @@ main {
 .account-summary {
   display: grid;
   grid-template-columns: 1.5fr 0.5fr;
-  gap: 12px;
-  margin: 20px 0 24px;
+  gap: 10px;
+  margin: 16px 0 20px;
 }
 
 .account-summary > div {
-  padding: 14px;
+  padding: 12px;
   border: 1px solid #dce7eb;
   border-radius: 14px;
   background: #f7fafb;
@@ -1345,7 +1268,7 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 20px 0 10px;
+  margin: 16px 0 8px;
   flex-wrap: wrap;
 }
 
@@ -1382,7 +1305,7 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 16px;
+  padding: 14px;
   border: 1px solid #dce7eb;
   border-radius: 14px;
   background: white;
@@ -1437,11 +1360,11 @@ main {
 
 .account-logout {
   width: 100%;
-  margin-top: 24px;
+  margin-top: 20px;
   color: #173c55;
   border: 1px solid #cbdbe1;
   background: #f3f7f9;
-  min-height: 48px;
+  min-height: 44px;
 }
 
 .account-logout:hover {
@@ -1544,7 +1467,8 @@ main {
   flex-wrap: wrap;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-links span {
   min-height: 36px;
   display: inline-flex;
   align-items: center;
@@ -1572,10 +1496,7 @@ main {
     gap: 40px;
   }
   .filters-card {
-    grid-template-columns: minmax(220px, 1.5fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) auto;
-  }
-  .journey-grid {
-    gap: 40px;
+    grid-template-columns: minmax(180px, 1.3fr) minmax(110px, 0.6fr) minmax(110px, 0.6fr) minmax(130px, 0.7fr) auto;
   }
   .projects-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1585,16 +1506,24 @@ main {
 
 /* 3. Tablet Portrait (max-width: 960px) */
 @media (max-width: 960px) {
-  .hero-grid,
   .detail-hero-grid,
-  .detail-layout,
-  .journey-grid {
+  .detail-layout {
     grid-template-columns: 1fr;
   }
 
   .hero-grid {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
     gap: 28px;
     padding: 44px 0;
+  }
+
+  .hero-content,
+  .hero-panel,
+  .hero-actions-bottom {
+    grid-column: 1;
+    grid-row: auto;
   }
 
   .hero-panel {
@@ -1740,7 +1669,6 @@ main {
     gap: 16px;
   }
 
-  .journey-steps,
   .detail-info-grid,
   .form-grid {
     grid-template-columns: 1fr;
@@ -1766,10 +1694,6 @@ main {
 
   .project-visual {
     height: 190px;
-  }
-
-  .journey-grid {
-    gap: 24px;
   }
 
   .detail-hero {

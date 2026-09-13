@@ -4,11 +4,10 @@ export default function Footer() {
       <div className="container footer-grid">
         <div>
           <strong>CRI Guelmim-Oued Noun</strong>
-          <p>Banque régionale de projets — prototype fonctionnel.</p>
+          <p>Banque régionale de projets</p>
         </div>
         <div className="footer-links">
-          <a href="https://guelmiminvest.ma/" target="_blank" rel="noreferrer">Guelmim Invest</a>
-          <a href="https://guelmiminvest.ma/contact/" target="_blank" rel="noreferrer">Contact</a>
+          <span>Contact</span>
         </div>
       </div>
     </footer>

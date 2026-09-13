@@ -33,7 +33,7 @@ export default function ProjectCard({ project, onOpen }) {
             <span>{label(project.secteur)}</span>
           </div>
         )}
-        <span className="project-code">{project.code_projet || 'Projet CRI'}</span>
+
       </div>
 
       <div className="project-card-body">
@@ -63,7 +63,7 @@ export default function ProjectCard({ project, onOpen }) {
         </div>
 
         <button className="project-link" type="button" onClick={() => onOpen(project)}>
-          Voir la fiche projet <span aria-hidden="true">→</span>
+          Voir la fiche projet
         </button>
       </div>
     </article>

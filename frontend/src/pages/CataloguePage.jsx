@@ -15,9 +15,15 @@ export default function CataloguePage({ projects, loading, loadError, onOpenProj
   const [search, setSearch] = useState('');
   const [sector, setSector] = useState('');
   const [province, setProvince] = useState('');
+  const [type, setType] = useState('');
 
   const sectors = useMemo(
     () => [...new Set(projects.map((project) => project.secteur).filter(Boolean))].sort(),
+    [projects],
+  );
+
+  const types = useMemo(
+    () => [...new Set(projects.map((project) => project.type_projet).filter(Boolean))].sort(),
     [projects],
   );
 
@@ -38,15 +44,17 @@ export default function CataloguePage({ projects, loading, loadError, onOpenProj
 
       const matchesSector = !sector || project.secteur === sector;
       const matchesProvince = !province || projectProvinces(project).includes(province);
+      const matchesType = !type || project.type_projet === type;
 
-      return matchesSearch && matchesSector && matchesProvince;
+      return matchesSearch && matchesSector && matchesProvince && matchesType;
     });
-  }, [projects, search, sector, province]);
+  }, [projects, search, sector, province, type]);
 
   function resetFilters() {
     setSearch('');
     setSector('');
     setProvince('');
+    setType('');
   }
 
   return (
@@ -76,6 +84,9 @@ export default function CataloguePage({ projects, loading, loadError, onOpenProj
             sectors={sectors}
             provinces={provinces}
             onReset={resetFilters}
+           type={type}
+           onTypeChange={setType}
+           types={types}
           />
 
           <div className="results-line">
@@ -100,21 +111,6 @@ export default function CataloguePage({ projects, loading, loadError, onOpenProj
               <button type="button" className="button button-secondary" onClick={resetFilters}>Réinitialiser</button>
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="journey-section">
-        <div className="container journey-grid">
-          <div>
-            <p className="eyebrow eyebrow-dark">Parcours investisseur</p>
-            <h2>De l'opportunité au Business Plan</h2>
-          </div>
-          <ol className="journey-steps">
-            <li><span>01</span><div><strong>Explorer</strong><p>Consultez et filtrez les opportunités.</p></div></li>
-            <li><span>02</span><div><strong>Choisir</strong><p>Accédez à la fiche détaillée du projet.</p></div></li>
-            <li><span>03</span><div><strong>Demander</strong><p>Renseignez vos informations investisseur.</p></div></li>
-            <li><span>04</span><div><strong>Accéder</strong><p>Après validation du CRI, recevez le Business Plan.</p></div></li>
-          </ol>
         </div>
       </section>
     </>

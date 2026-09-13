@@ -157,22 +157,11 @@ export default function ProjetDetailPage({
       <section className="detail-hero">
         <div className="container">
           <button className="back-link" type="button" onClick={onBack}>
-            ← Retour aux projets
+            Retour aux projets
           </button>
 
           <div className="detail-hero-grid">
             <div className="detail-copy">
-              <div className="detail-tags">
-                <span>{label(project.secteur)}</span>
-                <span>{projectProvinceLabel(project, 'Guelmim-Oued Noun')}</span>
-                {projectTypeLabel(project.type_projet) && (
-                  <span>{projectTypeLabel(project.type_projet)}</span>
-                )}
-              </div>
-
-              <p className="project-detail-code">
-                {project.code_projet || 'Projet CRI'}
-              </p>
 
               <h1>{project.titre}</h1>
 
@@ -220,8 +209,8 @@ export default function ProjetDetailPage({
               </div>
 
               <div>
-                <span>Code projet</span>
-                <strong>{project.code_projet || 'À préciser'}</strong>
+                <span>Type de projet</span>
+                <strong>{project.type_projet ? projectTypeLabel(project.type_projet) : 'À préciser'}</strong>
               </div>
             </div>
           </div>

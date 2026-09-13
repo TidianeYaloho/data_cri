@@ -1,3 +1,5 @@
+import { projectTypeLabel } from '../utils/projectFields.js';
+
 function normalizeLabel(value) {
   if (!value) return '';
   return value.charAt(0).toUpperCase() + value.slice(1).replaceAll('_', ' ');
@@ -10,8 +12,11 @@ export default function FilterBar({
   onSectorChange,
   province,
   onProvinceChange,
+  type,
+  onTypeChange,
   sectors,
   provinces,
+  types,
   onReset,
 }) {
   return (
@@ -46,7 +51,15 @@ export default function FilterBar({
           ))}
         </select>
       </label>
-
+       <label className="select-field">
+         <span>Type de projet</span>
+         <select value={type} onChange={(event) => onTypeChange(event.target.value)}>
+           <option value="">Tous les types</option>
+           {types.map((item) => (
+             <option key={item} value={item}>{projectTypeLabel(item)}</option>
+           ))}
+         </select>
+       </label>
       <button className="reset-button" type="button" onClick={onReset}>Réinitialiser</button>
     </div>
   );
