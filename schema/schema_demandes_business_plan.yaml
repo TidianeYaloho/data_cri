@@ -70,7 +70,7 @@ fields:
       options:
         template: "{{titre}}"
       hidden: false
-      readonly: false
+      readonly: true
       required: true
       sort: 2
       special:
@@ -106,7 +106,7 @@ fields:
       options:
         template: "{{prenom}} {{nom}}"
       hidden: false
-      readonly: false
+      readonly: true
       required: true
       sort: 3
       special:
@@ -145,10 +145,8 @@ fields:
       note: "État de traitement de la demande."
       options:
         choices:
-          - {text: "Demandée", value: demandee}
           - {text: "Validée", value: validee}
           - {text: "Refusée", value: refusee}
-          - {text: "Téléchargée", value: telechargee}
       hidden: false
       readonly: false
       required: true

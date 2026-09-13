@@ -905,7 +905,7 @@ fields:
     note: Projet pour lequel le Business Plan est demandé.
     options:
       template: '{{titre}}'
-    readonly: false
+    readonly: true
     required: true
     searchable: true
     sort: 2
@@ -948,7 +948,7 @@ fields:
     note: Investisseur ayant effectué la demande.
     options:
       template: '{{prenom}} {{nom}}'
-    readonly: false
+    readonly: true
     required: true
     searchable: true
     sort: 3
@@ -999,14 +999,10 @@ fields:
     note: État de traitement de la demande.
     options:
       choices:
-      - text: Demandée
-        value: demandee
       - text: Validée
         value: validee
       - text: Refusée
         value: refusee
-      - text: Téléchargée
-        value: telechargee
     readonly: false
     required: true
     searchable: true

@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "commande-de920": {
+      "hosting": {
+        "cri": [
+          "cri-gon-banque-projets-demo"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

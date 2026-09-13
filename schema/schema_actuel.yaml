@@ -959,7 +959,7 @@ fields:
       note: Projet pour lequel le Business Plan est demandé.
       options:
         template: '{{titre}}'
-      readonly: false
+      readonly: true
       required: true
       searchable: true
       sort: 2
@@ -1002,7 +1002,7 @@ fields:
       note: Investisseur ayant effectué la demande.
       options:
         template: '{{prenom}} {{nom}}'
-      readonly: false
+      readonly: true
       required: true
       searchable: true
       sort: 3
@@ -1053,13 +1053,11 @@ fields:
       note: État de traitement de la demande.
       options:
         choices:
-          - text: Demandée
-            value: demandee
           - text: Validée
             value: validee
           - text: Refusée
             value: refusee
-      readonly: false
+      readonly: true
       required: true
       searchable: true
       sort: 4
@@ -1484,7 +1482,7 @@ fields:
       note: null
       options:
         trim: true
-      readonly: false
+      readonly: true
       required: true
       searchable: true
       sort: 2
@@ -2454,6 +2452,50 @@ fields:
       table: parametres_plateforme
       data_type: character varying
       default_value: contact@cri.local
+      max_length: 255
+      numeric_precision: null
+      numeric_scale: null
+      is_nullable: true
+      is_unique: false
+      is_indexed: false
+      is_primary_key: false
+      is_generated: false
+      generation_expression: null
+      has_auto_increment: false
+      foreign_key_table: null
+      foreign_key_column: null
+  - collection: parametres_plateforme
+    field: email_nom_expediteur
+    type: string
+    meta:
+      collection: parametres_plateforme
+      conditions: null
+      display: null
+      display_options: null
+      field: email_nom_expediteur
+      group: null
+      hidden: false
+      interface: input
+      note: Nom affiché comme expéditeur des e-mails envoyés aux investisseurs.
+      options: null
+      readonly: false
+      required: false
+      searchable: true
+      sort: 13
+      special: null
+      translations:
+        - language: fr-FR
+          translation: Nom de l'expéditeur e-mail
+        - language: en-US
+          translation: Nom de l'expéditeur e-mail
+      validation: null
+      validation_message: null
+      width: half
+    schema:
+      name: email_nom_expediteur
+      table: parametres_plateforme
+      data_type: character varying
+      default_value: CRI Guelmim-Oued Noun
       max_length: 255
       numeric_precision: null
       numeric_scale: null
