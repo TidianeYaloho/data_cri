@@ -6,27 +6,25 @@ function installCriTitleCleaner() {
 
   window.__criTitleCleanerInstalled = true;
 
-  function cleanTitle() {
-    const prefix = 'Directus · ';
+  const expectedTitle = 'BANQUE DE PROJETS';
 
-    if (document.title.startsWith(prefix)) {
-      document.title = document.title.slice(prefix.length);
+  function enforceTitle() {
+    if (document.title !== expectedTitle) {
+      document.title = expectedTitle;
     }
   }
 
   function startObserver() {
-    const titleElement = document.querySelector('title');
-
-    if (!titleElement) {
+    if (!document.head) {
       setTimeout(startObserver, 100);
       return;
     }
 
-    cleanTitle();
+    enforceTitle();
 
-    const observer = new MutationObserver(cleanTitle);
+    const observer = new MutationObserver(enforceTitle);
 
-    observer.observe(titleElement, {
+    observer.observe(document.head, {
       childList: true,
       subtree: true,
       characterData: true
