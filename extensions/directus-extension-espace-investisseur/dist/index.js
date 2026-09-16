@@ -94,7 +94,6 @@ async function sendVerificationEmail({
   const emailContact = settings?.email_adresse_contact || env.CRI_CONTACT_EMAIL || 'contact@cri.local';
   const verificationUrl = buildVerificationUrl(env, rawToken);
 
-  // Variables de remplacement (sans 'signature' : renderEmailBody l'injecte)
   const variables = {
     prenom: profile.prenom || '',
     nom: profile.nom || '',
@@ -110,7 +109,6 @@ async function sendVerificationEmail({
   const signature = settings?.email_signature || '';
 
   const defaultSubject = 'Vérifiez votre adresse e-mail - Espace investisseur CRI';
-  // Corps par défaut : pas de {{signature}}, renderEmailBody l'ajoutera automatiquement (Cas A)
   const defaultBodyTemplate = [
     `Bonjour {{nom_complet}},`,
     '',
@@ -217,6 +215,20 @@ function ensureAccountsEnabled(settings, res) {
   return false;
 }
 
+function ensureAccountActive(investor, res) {
+  if (!investor) return false;
+
+  if (investor.statut_compte === 'ferme') {
+    res.status(403).json({
+      error: 'ACCOUNT_CLOSED',
+      message: 'Ce compte investisseur a été fermé. Pour réactiver votre compte, veuillez contacter le CRI.',
+    });
+    return false;
+  }
+
+  return true;
+}
+
 function normalizeRegistration(body) {
   return {
     prenom: normalizeText(body?.prenom),
@@ -314,6 +326,9 @@ async function loadInvestorByUser(database, userId) {
       'date_created',
       'directus_user',
       'email_verifie_at',
+      'statut_compte',
+      'date_fermeture_compte',
+      'raison_fermeture',
     ])
     .where('directus_user', userId)
     .first();
@@ -380,10 +395,17 @@ export default {
 
         const existingUser = existingUsers?.[0] ?? null;
         const existingInvestor = await database('investisseurs')
-          .select(['id', 'directus_user'])
+          .select(['id', 'directus_user', 'statut_compte'])
           .whereRaw('LOWER("email") = ?', [profile.email])
           .orderBy('id', 'desc')
           .first();
+
+        if (existingInvestor?.statut_compte === 'ferme') {
+          return res.status(403).json({
+            error: 'ACCOUNT_CLOSED',
+            message: 'Un compte fermé existe déjà avec cette adresse e-mail. Veuillez contacter le CRI pour réactiver votre compte.',
+          });
+        }
 
         if (existingUser) {
           if (
@@ -453,6 +475,7 @@ export default {
               email_verification_token_hash: verification.tokenHash,
               email_verification_expires_at: verification.expiresAt,
               email_verifie_at: null,
+              statut_compte: 'actif',
             });
         } else {
           const inserted = await database('investisseurs')
@@ -471,6 +494,7 @@ export default {
               email_verification_token_hash: verification.tokenHash,
               email_verification_expires_at: verification.expiresAt,
               email_verifie_at: null,
+              statut_compte: 'actif',
             })
             .returning(['id']);
 
@@ -540,10 +564,17 @@ export default {
         }
 
         const investor = await database('investisseurs')
-          .select(['id', 'prenom', 'nom', 'email', 'directus_user'])
+          .select(['id', 'prenom', 'nom', 'email', 'directus_user', 'statut_compte'])
           .whereRaw('LOWER("email") = ?', [email])
           .orderBy('id', 'desc')
           .first();
+
+        if (investor?.statut_compte === 'ferme') {
+          return res.status(403).json({
+            error: 'ACCOUNT_CLOSED',
+            message: 'Ce compte investisseur a été fermé.',
+          });
+        }
 
         if (investor?.directus_user) {
           const user = await database('directus_users')
@@ -611,9 +642,16 @@ export default {
 
         const tokenHash = hashToken(rawToken);
         const investor = await database('investisseurs')
-          .select(['id', 'directus_user', 'email_verification_expires_at'])
+          .select(['id', 'directus_user', 'email_verification_expires_at', 'statut_compte'])
           .where('email_verification_token_hash', tokenHash)
           .first();
+
+        if (investor?.statut_compte === 'ferme') {
+          return res.status(403).json({
+            error: 'ACCOUNT_CLOSED',
+            message: 'Ce compte investisseur a été fermé.',
+          });
+        }
 
         if (
           !investor?.directus_user ||
@@ -681,6 +719,17 @@ export default {
           });
         }
 
+        const investor = await database('investisseurs')
+          .select(['statut_compte'])
+          .whereRaw('LOWER("email") = ?', [email])
+          .first();
+
+        if (investor?.statut_compte === 'ferme') {
+          return res.json({
+            data: { message: GENERIC_PASSWORD_RESET_MESSAGE },
+          });
+        }
+
         const schema = await getSchema();
         const usersService = new UsersService({
           schema,
@@ -695,8 +744,6 @@ export default {
             'Réinitialisation de votre mot de passe - Espace investisseur CRI',
           );
         } catch (resetError) {
-          // Réponse volontairement identique pour éviter de révéler
-          // si une adresse possède ou non un compte actif.
           logger.debug?.(
             resetError,
             `Demande de réinitialisation non envoyée pour ${email}`,
@@ -785,6 +832,8 @@ export default {
           });
         }
 
+        if (!ensureAccountActive(investor, res)) return;
+
         const demandes = await loadInvestorRequests(database, investor.id);
 
         return res.json({
@@ -801,6 +850,8 @@ export default {
               secteur: investor.secteur,
               province: investor.province,
               email_verifie_at: investor.email_verifie_at,
+              statut_compte: investor.statut_compte || 'actif',
+              date_fermeture_compte: investor.date_fermeture_compte || null,
             },
             demandes,
           },
@@ -833,6 +884,8 @@ export default {
             message: "Ce compte n'est pas associé à un profil investisseur.",
           });
         }
+
+        if (!ensureAccountActive(investor, res)) return;
 
         const updates = {
           prenom: normalizeText(req.body?.prenom),
@@ -895,6 +948,65 @@ export default {
       }
     });
 
+    router.post('/fermer-compte', async (req, res, next) => {
+      try {
+        const settings = await readSettings(database);
+        if (!ensureAccountsEnabled(settings, res)) return;
+
+        const userId = safeUserId(req.accountability?.user);
+
+        if (!userId) {
+          return res.status(401).json({
+            error: 'AUTHENTICATION_REQUIRED',
+            message: 'Connectez-vous à votre espace investisseur.',
+          });
+        }
+
+        const investor = await loadInvestorByUser(database, userId);
+
+        if (!investor) {
+          return res.status(403).json({
+            error: 'NOT_INVESTOR_ACCOUNT',
+            message: "Ce compte n'est pas associé à un profil investisseur.",
+          });
+        }
+
+        if (!ensureAccountActive(investor, res)) return;
+
+        const now = new Date();
+        const raison = normalizeText(req.body?.raison) || "Fermeture demandée par l'investisseur";
+
+        await database('investisseurs')
+          .where('id', investor.id)
+          .update({
+            statut_compte: 'ferme',
+            date_fermeture_compte: now,
+            raison_fermeture: raison,
+          });
+
+        const schema = await getSchema();
+        const usersService = new UsersService({
+          schema,
+          accountability: { admin: true },
+          knex: database,
+        });
+
+        await usersService.updateOne(userId, { status: 'suspended' });
+
+        logger.info(`Compte investisseur ID ${investor.id} (Directus user ${userId}) fermé avec succès.`);
+
+        return res.json({
+          data: {
+            ferme: true,
+            message: 'Votre compte investisseur a été fermé avec succès.',
+          },
+        });
+      } catch (error) {
+        logger.error(error, 'Erreur lors de la fermeture du compte investisseur');
+        next(error);
+      }
+    });
+
     router.post('/demandes/:id/acces', async (req, res, next) => {
       try {
         const settings = await readSettings(database);
@@ -924,6 +1036,8 @@ export default {
             message: "Ce compte n'est pas associé à un profil investisseur.",
           });
         }
+
+        if (!ensureAccountActive(investor, res)) return;
 
         const requestId = Number(req.params.id);
 

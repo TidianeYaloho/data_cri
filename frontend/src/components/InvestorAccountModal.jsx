@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  closeInvestorAccount,
   createAccountBusinessPlanAccess,
   fetchInvestorAccount,
   loginInvestor,
@@ -11,7 +12,6 @@ import {
   updateInvestorProfile,
   verifyInvestorEmail,
 } from '../api/directus.js';
-
 
 const INVESTOR_SECTORS = [
   { value: 'agriculture', label: 'Agriculture' },
@@ -81,6 +81,8 @@ export default function InvestorAccountModal({
   const [resetForm, setResetForm] = useState({ password: '', confirm: '' });
   const [profileForm, setProfileForm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [closeAgreement, setCloseAgreement] = useState(false);
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState('');
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
@@ -224,7 +226,8 @@ export default function InvestorAccountModal({
       setStatus('error');
       setPendingVerificationEmail(loginForm.email.trim().toLowerCase());
       setMessage(
-        'Adresse e-mail ou mot de passe incorrect, ou adresse e-mail non encore vérifiée.',
+        error.message ||
+          'Adresse e-mail ou mot de passe incorrect, ou accès au compte suspendu. Si vous pensez que votre compte a été fermé, veuillez contacter le CRI.',
       );
     }
   }
@@ -256,6 +259,14 @@ export default function InvestorAccountModal({
     } catch (error) {
       console.error(error);
       setStatus('error');
+
+      if (error.code === 'ACCOUNT_CLOSED') {
+        setMessage(
+          error.message ||
+            'Un compte fermé existe déjà avec cette adresse e-mail. Veuillez contacter le CRI.',
+        );
+        return;
+      }
 
       if (error.code === 'EMAIL_NOT_VERIFIED') {
         const email = registerForm.email.trim().toLowerCase();
@@ -389,6 +400,26 @@ export default function InvestorAccountModal({
       console.error(error);
       setStatus('error');
       setMessage("Le profil n'a pas pu être mis à jour.");
+    }
+  }
+
+  async function handleCloseAccount() {
+    if (!closeAgreement) return;
+    setStatus('loading');
+    setMessage('');
+
+    try {
+      await closeInvestorAccount("Fermeture demandée par l'investisseur depuis son espace");
+      onAccountChange(null);
+      setShowCloseConfirm(false);
+      setCloseAgreement(false);
+      setView('login');
+      setStatus('success');
+      setMessage('Votre compte investisseur a été fermé avec succès. Vous avez été déconnecté.');
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+      setMessage(error.message || 'Impossible de fermer votre compte pour le moment.');
     }
   }
 
@@ -653,6 +684,66 @@ export default function InvestorAccountModal({
                   </div>
                 )}
 
+                <div className="account-section-heading account-profile-heading account-danger-heading">
+                  <h3>Gestion du compte</h3>
+                </div>
+
+                {!showCloseConfirm ? (
+                  <div className="account-close-trigger-box">
+                    <p className="account-close-hint">
+                      La fermeture de votre compte suspend l'accès à votre espace investisseur. Vous ne pourrez plus vous connecter pour suivre vos demandes, envoyer de nouvelles demandes ou gérer vos informations.
+                    </p>
+                    <button
+                      className="button button-danger-outline"
+                      type="button"
+                      disabled={status === 'loading'}
+                      onClick={() => {
+                        setShowCloseConfirm(true);
+                        setCloseAgreement(false);
+                      }}
+                    >
+                      Fermer mon compte
+                    </button>
+                  </div>
+                ) : (
+                  <div className="account-close-confirm-box">
+                    <h4 className="account-close-confirm-title">Confirmer la fermeture du compte</h4>
+                    <p className="account-close-confirm-desc">
+                      En fermant votre compte, vous serez immédiatement déconnecté et ne pourrez plus accéder à votre espace investisseur sans l'intervention du CRI.
+                    </p>
+                    <label className="account-close-checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={closeAgreement}
+                        onChange={(e) => setCloseAgreement(e.target.checked)}
+                      />
+                      <span>Je confirme vouloir fermer mon compte investisseur.</span>
+                    </label>
+
+                    <div className="account-close-actions">
+                      <button
+                        className="button button-danger"
+                        type="button"
+                        disabled={!closeAgreement || status === 'loading'}
+                        onClick={handleCloseAccount}
+                      >
+                        {status === 'loading' ? 'Fermeture en cours...' : 'Confirmer la fermeture'}
+                      </button>
+                      <button
+                        className="button button-ghost"
+                        type="button"
+                        disabled={status === 'loading'}
+                        onClick={() => {
+                          setShowCloseConfirm(false);
+                          setCloseAgreement(false);
+                        }}
+                      >
+                        Annuler
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {message && (
                   <div className={`form-message form-message-${status}`}>{message}</div>
                 )}
@@ -799,7 +890,7 @@ export default function InvestorAccountModal({
                       minLength="10"
                       type="password"
                       value={registerPasswordConfirm}
-                      onChange={(event) => setRegisterPasswordConfirm(event.target.value)}
+                      onChange={(e) => setRegisterPasswordConfirm(e.target.value)}
                     />
                   </label>
                   <label>
@@ -811,29 +902,35 @@ export default function InvestorAccountModal({
                     <input name="entreprise" value={registerForm.entreprise} onChange={updateRegister} />
                   </label>
                   <label>
-                    Secteur
+                    Secteur d'activité
                     <select required name="secteur" value={registerForm.secteur} onChange={updateRegister}>
                       <option value="">Sélectionner un secteur</option>
-                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                      {INVESTOR_SECTORS.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <label>
-                    Province
+                    Province d'intérêt
                     <select required name="province" value={registerForm.province} onChange={updateRegister}>
-                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
                     </select>
                   </label>
                 </div>
+
                 <button
                   className="button button-primary form-submit"
                   type="submit"
                   disabled={status === 'loading'}
                 >
-                  {status === 'loading' ? 'Création...' : 'Créer mon compte'}
+                  {status === 'loading' ? 'Création en cours...' : 'Créer mon compte'}
                 </button>
-                <small className="privacy-note">
-                  Le mot de passe doit contenir au moins 10 caractères. Votre adresse e-mail devra être vérifiée avant la première connexion.
-                </small>
               </form>
             )}
 
@@ -846,19 +943,21 @@ export default function InvestorAccountModal({
                       required
                       type="email"
                       value={forgotEmail}
-                      onChange={(event) => setForgotEmail(event.target.value)}
+                      onChange={(e) => setForgotEmail(e.target.value)}
                     />
                   </label>
                 </div>
+
                 <button
                   className="button button-primary form-submit"
                   type="submit"
                   disabled={status === 'loading'}
                 >
-                  {status === 'loading' ? 'Envoi...' : 'Envoyer le lien de réinitialisation'}
+                  {status === 'loading' ? 'Envoi...' : 'Envoyer le lien'}
                 </button>
+
                 <button
-                  className="account-inline-link account-back-link"
+                  className="account-inline-link"
                   type="button"
                   onClick={() => {
                     setView('login');
@@ -880,10 +979,10 @@ export default function InvestorAccountModal({
                       minLength="10"
                       type="password"
                       value={resetForm.password}
-                      onChange={(event) =>
+                      onChange={(e) =>
                         setResetForm((current) => ({
                           ...current,
-                          password: event.target.value,
+                          password: e.target.value,
                         }))
                       }
                     />
@@ -895,30 +994,29 @@ export default function InvestorAccountModal({
                       minLength="10"
                       type="password"
                       value={resetForm.confirm}
-                      onChange={(event) =>
+                      onChange={(e) =>
                         setResetForm((current) => ({
                           ...current,
-                          confirm: event.target.value,
+                          confirm: e.target.value,
                         }))
                       }
                     />
                   </label>
                 </div>
+
                 <button
                   className="button button-primary form-submit"
                   type="submit"
                   disabled={status === 'loading'}
                 >
-                  {status === 'loading' ? 'Modification...' : 'Modifier mon mot de passe'}
+                  {status === 'loading' ? 'Modification...' : 'Changer le mot de passe'}
                 </button>
               </form>
             )}
           </>
         )}
-
-
-      </div>
         </div>
+      </div>
     </div>
   );
 }

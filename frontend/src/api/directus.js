@@ -155,8 +155,6 @@ export async function registerInvestorAccount(form) {
   return payload?.data ?? null;
 }
 
-
-
 export async function verifyInvestorEmail(token) {
   const response = await fetch(
     `${DIRECTUS_URL}/espace-investisseur/verification-email`,
@@ -270,7 +268,7 @@ export async function loginInvestor(email, password) {
     const error = makeApiError(
       response,
       payload,
-      'Adresse e-mail ou mot de passe incorrect.',
+      'Adresse e-mail ou mot de passe incorrect, ou accès au compte suspendu. Si vous pensez que votre compte a été fermé, veuillez contacter le CRI.',
     );
     error.code = 'LOGIN_FAILED';
     throw error;
@@ -355,6 +353,32 @@ export async function updateInvestorProfile(profile) {
     throw makeApiError(response, payload, 'La mise à jour du profil a échoué.');
   }
 
+  return payload?.data ?? null;
+}
+
+export async function closeInvestorAccount(raison = '') {
+  const token = await ensureInvestorToken();
+  if (!token) {
+    const error = new Error('Votre session a expiré.');
+    error.code = 'AUTHENTICATION_REQUIRED';
+    throw error;
+  }
+
+  const response = await fetch(`${DIRECTUS_URL}/espace-investisseur/fermer-compte`, {
+    method: 'POST',
+    headers: investorAuthHeaders({
+      'Content-Type': 'application/json',
+    }),
+    body: JSON.stringify({ raison }),
+  });
+
+  const payload = await readJson(response);
+
+  if (!response.ok) {
+    throw makeApiError(response, payload, 'La fermeture du compte a échoué.');
+  }
+
+  investorAccessToken = null;
   return payload?.data ?? null;
 }
 

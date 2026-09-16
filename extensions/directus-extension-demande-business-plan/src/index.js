@@ -128,6 +128,7 @@ export default {
               'pays',
               'secteur',
               'province',
+              'statut_compte',
             ])
             .where('directus_user', userId)
             .first();
@@ -136,6 +137,13 @@ export default {
             return res.status(403).json({
               error: 'INVESTOR_ACCOUNT_NOT_LINKED',
               message: "Ce compte n'est pas associé à un profil investisseur.",
+            });
+          }
+
+          if (accountInvestor.statut_compte === 'ferme') {
+            return res.status(403).json({
+              error: 'ACCOUNT_CLOSED',
+              message: 'Ce compte investisseur a été fermé. Vous ne pouvez pas effectuer de nouvelles demandes.',
             });
           }
 
