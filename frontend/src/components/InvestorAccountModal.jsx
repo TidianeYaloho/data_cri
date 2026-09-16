@@ -71,6 +71,9 @@ export default function InvestorAccountModal({
   initialResetToken = null,
 }) {
   const [view, setView] = useState(initialResetToken ? 'reset' : 'login');
+  const [activeTab, setActiveTab] = useState('demandes');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('toutes');
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [registerForm, setRegisterForm] = useState(initialRegisterForm);
   const [registerPasswordConfirm, setRegisterPasswordConfirm] = useState('');
@@ -166,6 +169,22 @@ export default function InvestorAccountModal({
     () => (Array.isArray(account?.demandes) ? account.demandes : []),
     [account],
   );
+
+  const filteredDemandes = useMemo(() => {
+    if (statusFilter === 'toutes') return demandes;
+    return demandes.filter((d) => d.statut === statusFilter);
+  }, [demandes, statusFilter]);
+
+  const paginatedDemandes = useMemo(() => {
+    const startIndex = (currentPage - 1) * 5;
+    return filteredDemandes.slice(startIndex, startIndex + 5);
+  }, [filteredDemandes, currentPage]);
+
+  const totalPages = Math.ceil(filteredDemandes.length / 5);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter]);
 
   const forceAuthFlow = verificationFlowActive || resetFlowActive;
 
@@ -467,119 +486,187 @@ export default function InvestorAccountModal({
               </div>
             </div>
 
-            <div className="account-section-heading">
-              <h3>Mes demandes</h3>
+            <div className="account-tabs">
               <button
-                className="text-button"
+                className={activeTab === 'demandes' ? 'active' : ''}
                 type="button"
-                onClick={() => refreshAccount().catch(console.error)}
+                onClick={() => setActiveTab('demandes')}
               >
-                Actualiser
+                Mes demandes
+              </button>
+              <button
+                className={activeTab === 'profil' ? 'active' : ''}
+                type="button"
+                onClick={() => setActiveTab('profil')}
+              >
+                Mon profil
               </button>
             </div>
 
-            <div className="account-requests">
-              {demandes.length === 0 ? (
-                <div className="account-empty">
-                  Vous n'avez encore demandé aucun Business Plan.
+            {activeTab === 'demandes' && (
+              <>
+                <div className="account-section-heading">
+                  <div className="request-filters">
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="filter-select"
+                    >
+                      <option value="toutes">Toutes</option>
+                      <option value="demandee">En attente</option>
+                      <option value="validee">Validées</option>
+                      <option value="refusee">Refusées</option>
+                      <option value="telechargee">Téléchargées</option>
+                    </select>
+                  </div>
+                  <button
+                    className="text-button"
+                    type="button"
+                    onClick={() => refreshAccount().catch(console.error)}
+                  >
+                    Actualiser
+                  </button>
                 </div>
-              ) : (
-                demandes.map((demande) => (
-                  <article className="account-request" key={demande.id}>
-                    <div>
-                      <span className={`request-status request-status-${demande.statut}`}>
-                        {requestStatusLabel(demande.statut)}
-                      </span>
-                      <h4>{demande.projet_titre || 'Projet CRI'}</h4>
-                      <p>
-                        {demande.code_projet || 'Projet'} · demande du{' '}
-                        {formatDate(demande.date_created)}
-                      </p>
+
+                <div className="account-requests">
+                  {filteredDemandes.length === 0 ? (
+                    <div className="account-empty">
+                      Aucune demande trouvée pour ce statut.
                     </div>
+                  ) : (
+                    paginatedDemandes.map((demande) => (
+                      <article className="account-request" key={demande.id}>
+                        <div>
+                          <span className={`request-status request-status-${demande.statut}`}>
+                            {requestStatusLabel(demande.statut)}
+                          </span>
+                          <h4>{demande.projet_titre || 'Projet CRI'}</h4>
+                          <p>
+                            {demande.code_projet || 'Projet'} · demande du{' '}
+                            {formatDate(demande.date_created)}
+                          </p>
+                        </div>
 
-                    {['validee', 'telechargee'].includes(demande.statut) && (
-                      <button
-                        className="button button-secondary account-download"
-                        type="button"
-                        disabled={status === 'loading'}
-                        onClick={() => downloadFromRequest(demande.id)}
-                      >
-                        {demande.statut === 'telechargee'
-                          ? 'Télécharger à nouveau'
-                          : 'Télécharger'}
-                      </button>
-                    )}
-                  </article>
-                ))
-              )}
-            </div>
-
-            <div className="account-section-heading account-profile-heading">
-              <h3>Mon profil</h3>
-              <button
-                className="text-button"
-                type="button"
-                onClick={() => setEditingProfile((current) => !current)}
-              >
-                {editingProfile ? 'Annuler' : 'Modifier'}
-              </button>
-            </div>
-
-            {editingProfile && profileForm && (
-              <form className="request-form" onSubmit={saveProfile}>
-                <div className="form-grid">
-                  <label>
-                    Prénom
-                    <input required name="prenom" value={profileForm.prenom} onChange={updateProfile} />
-                  </label>
-                  <label>
-                    Nom
-                    <input required name="nom" value={profileForm.nom} onChange={updateProfile} />
-                  </label>
-                  <label>
-                    Téléphone
-                    <input name="telephone" value={profileForm.telephone} onChange={updateProfile} />
-                  </label>
-                  <label>
-                    Entreprise / Porteur de projet
-                    <input name="entreprise" value={profileForm.entreprise} onChange={updateProfile} />
-                  </label>
-                  <label>
-                    Secteur
-                    <select required name="secteur" value={profileForm.secteur} onChange={updateProfile}>
-                      <option value="">Sélectionner un secteur</option>
-                      {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                    </select>
-                  </label>
-                  <label>
-                    Province
-                    <select required name="province" value={profileForm.province} onChange={updateProfile}>
-                      {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
-                    </select>
-                  </label>
+                        {['validee', 'telechargee'].includes(demande.statut) && (
+                          <button
+                            className="button button-secondary account-download"
+                            type="button"
+                            disabled={status === 'loading'}
+                            onClick={() => downloadFromRequest(demande.id)}
+                          >
+                            {demande.statut === 'telechargee'
+                              ? 'Télécharger à nouveau'
+                              : 'Télécharger'}
+                          </button>
+                        )}
+                      </article>
+                    ))
+                  )}
                 </div>
+
+                {totalPages > 1 && (
+                  <div className="pagination">
+                    <button
+                      type="button"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                    >
+                      Précédent
+                    </button>
+                    <span className="pagination-info">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                    >
+                      Suivant
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {activeTab === 'profil' && (
+              <>
+                <div className="account-section-heading account-profile-heading">
+                  <h3>Mes informations</h3>
+                  <button
+                    className="text-button"
+                    type="button"
+                    onClick={() => setEditingProfile((current) => !current)}
+                  >
+                    {editingProfile ? 'Annuler' : 'Modifier'}
+                  </button>
+                </div>
+
+                {editingProfile && profileForm ? (
+                  <form className="request-form" onSubmit={saveProfile}>
+                    <div className="form-grid">
+                      <label>
+                        Prénom
+                        <input required name="prenom" value={profileForm.prenom} onChange={updateProfile} />
+                      </label>
+                      <label>
+                        Nom
+                        <input required name="nom" value={profileForm.nom} onChange={updateProfile} />
+                      </label>
+                      <label>
+                        Téléphone
+                        <input name="telephone" value={profileForm.telephone} onChange={updateProfile} />
+                      </label>
+                      <label>
+                        Entreprise / Porteur de projet
+                        <input name="entreprise" value={profileForm.entreprise} onChange={updateProfile} />
+                      </label>
+                      <label>
+                        Secteur
+                        <select required name="secteur" value={profileForm.secteur} onChange={updateProfile}>
+                          <option value="">Sélectionner un secteur</option>
+                          {INVESTOR_SECTORS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                        </select>
+                      </label>
+                      <label>
+                        Province
+                        <select required name="province" value={profileForm.province} onChange={updateProfile}>
+                          {['Guelmim', 'Assa-Zag', 'Sidi Ifni', 'Tan-Tan'].map((item) => <option key={item}>{item}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                    <button
+                      className="button button-primary form-submit"
+                      type="submit"
+                      disabled={status === 'loading'}
+                    >
+                      Enregistrer le profil
+                    </button>
+                  </form>
+                ) : (
+                  <div className="profile-details">
+                    <p><strong>Prénom :</strong> {account.profil.prenom}</p>
+                    <p><strong>Nom :</strong> {account.profil.nom}</p>
+                    <p><strong>Téléphone :</strong> {account.profil.telephone || '—'}</p>
+                    <p><strong>Entreprise :</strong> {account.profil.entreprise || '—'}</p>
+                    <p><strong>Secteur :</strong> {account.profil.secteur ? INVESTOR_SECTORS.find(s => s.value === account.profil.secteur)?.label || account.profil.secteur : '—'}</p>
+                    <p><strong>Province :</strong> {account.profil.province || '—'}</p>
+                  </div>
+                )}
+
+                {message && (
+                  <div className={`form-message form-message-${status}`}>{message}</div>
+                )}
+
                 <button
-                  className="button button-primary form-submit"
-                  type="submit"
+                  className="button button-ghost account-logout"
+                  type="button"
                   disabled={status === 'loading'}
+                  onClick={handleLogout}
                 >
-                  Enregistrer le profil
+                  Se déconnecter
                 </button>
-              </form>
+              </>
             )}
-
-            {message && (
-              <div className={`form-message form-message-${status}`}>{message}</div>
-            )}
-
-            <button
-              className="button button-ghost account-logout"
-              type="button"
-              disabled={status === 'loading'}
-              onClick={handleLogout}
-            >
-              Se déconnecter
-            </button>
           </>
         ) : (
           <>

@@ -1295,6 +1295,60 @@ main {
   align-items: center;
 }
 
+.request-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-select {
+  height: 36px;
+  border: 1px solid #dce7eb;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: white;
+  color: var(--ink);
+  font-size: 13px;
+  outline: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  background: white;
+  border: 1px solid #dce7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--cri-blue);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pagination button:disabled {
+  color: var(--muted);
+  background: #f7fafc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.profile-details p {
+  margin: 10px 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+
 .account-requests {
   display: grid;
   gap: 10px;
